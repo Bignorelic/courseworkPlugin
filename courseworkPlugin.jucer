@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="cNTPPL" name="courseworkPlugin" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" cppLanguageStandard="17">
   <MAINGROUP id="jjIC04" name="courseworkPlugin">
     <GROUP id="{7C24977D-0B1B-A508-6E62-AEDDE2D69011}" name="Source">
       <FILE id="KbRSE1" name="PluginProcessor.cpp" compile="1" resource="0"
