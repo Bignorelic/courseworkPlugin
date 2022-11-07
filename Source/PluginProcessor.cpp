@@ -166,7 +166,8 @@ bool CourseworkPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* CourseworkPluginAudioProcessor::createEditor()
 {
-    return new CourseworkPluginAudioProcessorEditor (*this);
+    //return new CourseworkPluginAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -181,6 +182,32 @@ void CourseworkPluginAudioProcessor::setStateInformation (const void* data, int 
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    //making variables for the filter frequencies
+    //normalisableRange -> (lower frequency, upper frequency, frequency step, skew)
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
+
+    //making different slopes: 12db/Oct, 24db/Oct, 36db/Oct and 48db/Oct
+    juce::StringArray stringArray;
+    for (int i = 0; i < 4; i++)
+    {
+        juce::String str;
+        str << (12 + i * 12);
+        str << " db/Oct";
+        stringArray.add(str);
+    }
+
+    //slopes for the filters
+    layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", stringArray, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
+
+    return layout;
 }
 
 //==============================================================================
