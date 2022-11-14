@@ -207,6 +207,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", stringArray, 0));
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
 
+    //parameters for distortion
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Drive", "Drive", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-12.f, 0.f, 0.01f, 1.f), 0.f));
+
     return layout;
 }
 
