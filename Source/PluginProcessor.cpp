@@ -107,6 +107,8 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
+    //auto chainSettings = getChainSettings(apvts);
+
 }
 
 void CourseworkPluginAudioProcessor::releaseResources()
@@ -194,6 +196,18 @@ void CourseworkPluginAudioProcessor::setStateInformation (const void* data, int 
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings settings;
+
+    settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
+    settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
+    settings.lowCutSlope = apvts.getRawParameterValue("LowCut Slope")->load();
+    settings.lowCutSlope = apvts.getRawParameterValue("HighCut Slope")->load();
+
+    return settings;
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcessor::createParameterLayout()

@@ -10,6 +10,14 @@
 
 #include <JuceHeader.h>
 
+struct ChainSettings
+{
+    float lowCutFreq{ 0 }, highCutFreq{ 0 };
+    int lowCutSlope{ 0 }, highCutSlope{ 0 };
+};
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
+
 //==============================================================================
 /**
 */
