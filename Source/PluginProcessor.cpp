@@ -308,7 +308,7 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     }
     }
 
-    auto& rightLowCut = leftChain.get < ChainPositions::LowCut>();
+    auto& rightLowCut = rightChain.get < ChainPositions::LowCut>();
 
     rightLowCut.setBypassed<0>(true);
     rightLowCut.setBypassed<1>(true);
