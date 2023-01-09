@@ -109,15 +109,27 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
 
     auto chainSettings = getChainSettings(apvts);
 
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
+    //low cut
+    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
 
     //low cut filter in the left channel
     auto& leftLowCut = leftChain.get <ChainPositions::LowCut>();
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    updateCutFilter(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
 
     //low cut filter in the right channel
     auto& rightLowCut = rightChain.get <ChainPositions::LowCut>();
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    updateCutFilter(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+
+
+    //now the same for the high cut filter
+    auto highCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
+
+    auto& leftHighCut = leftChain.get <ChainPositions::HighCut>();
+    updateCutFilter(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
+
+    auto& rightHighCut = rightChain.get <ChainPositions::HighCut>();
+    updateCutFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
+
 }
 
 void CourseworkPluginAudioProcessor::releaseResources()
@@ -170,13 +182,23 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     
     auto chainSettings = getChainSettings(apvts);
 
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
+    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
  
     auto& leftLowCut = leftChain.get <ChainPositions::LowCut>();
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    updateCutFilter(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
 
     auto& rightLowCut = rightChain.get <ChainPositions::LowCut>();
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    updateCutFilter(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+
+
+    auto highCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
+
+    auto& leftHighCut = leftChain.get <ChainPositions::HighCut>();
+    updateCutFilter(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
+
+    auto& rightHighCut = rightChain.get <ChainPositions::HighCut>();
+    updateCutFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
+
 
 
     juce::dsp::AudioBlock<float> block(buffer);

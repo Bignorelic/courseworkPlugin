@@ -89,6 +89,7 @@ private:
     enum ChainPositions
     {
         LowCut,
+        Peak,
         HighCut
     };
 
@@ -113,7 +114,7 @@ private:
         chain.template setBypassed<2>(true);
         chain.template setBypassed<3>(true);
 
-        switch (slope)
+        switch ( slope )
         {
             case Slope_48:
             {
