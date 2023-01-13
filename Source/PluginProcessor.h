@@ -107,7 +107,7 @@ private:
     }
 
     template<typename ChainType, typename CoefficientType>
-    void updateCutFilter(ChainType& chain, const CoefficientType& coefficients, const Slope& slope)
+    void updateFilter(ChainType& chain, const CoefficientType& coefficients, const Slope& slope)
     {
         chain.template setBypassed<0>(true);
         chain.template setBypassed<1>(true);
