@@ -15,7 +15,6 @@ struct CustomRotarySlider : juce::Slider
 {
     CustomRotarySlider() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox)
     {
-
     }
 };
 
@@ -40,9 +39,11 @@ private:
     CustomRotarySlider lowCutFreqSlider,
         highCutFreqSlider,
         driveSlider,
-        postGainSlider,
-        lowCutSlopeSlider,
-        highCutSlopeSlider;
+        postGainSlider;
+
+    juce::Slider lowCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
+    juce::Slider highCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
+
 
     std::vector<juce::Component*> getComps();
 
