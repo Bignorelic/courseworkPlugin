@@ -52,17 +52,19 @@ void CourseworkPluginAudioProcessorEditor::resized()
     auto waveformArea = visualiserArea;
 
     auto filterArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
-    auto lowCutArea = filterArea.removeFromLeft(bounds.getWidth() * 0.5);
-    auto highCutArea = filterArea;
+    auto lowCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.5);
+    lowCutArea = lowCutArea.removeFromLeft(lowCutArea.getWidth() * 0.9);
+    auto highCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.9);
 
     auto driveArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
-    auto postGainArea = bounds;
+    driveArea = driveArea.removeFromLeft(driveArea.getWidth() * 0.9);
+    auto postGainArea = bounds.removeFromLeft(bounds.getWidth() * 0.9);
 
-    lowCutFreqSlider.setBounds(lowCutArea);
-    highCutFreqSlider.setBounds(highCutArea);
+    lowCutFreqSlider.setBounds(lowCutArea.removeFromRight(lowCutArea.getWidth() * 0.89));
+    highCutFreqSlider.setBounds(highCutArea.removeFromRight(highCutArea.getWidth() * 0.89));
 
-    driveSlider.setBounds(driveArea);
-    postGainSlider.setBounds(postGainArea);
+    driveSlider.setBounds(driveArea.removeFromRight(driveArea.getWidth() * 0.89));
+    postGainSlider.setBounds(postGainArea.removeFromRight(postGainArea.getWidth() * 0.89));
 }
 
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
@@ -72,6 +74,8 @@ std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
         &lowCutFreqSlider,
         &highCutFreqSlider,
         &driveSlider,
-        &postGainSlider
+        &postGainSlider,
+        &lowCutSlopeSlider,
+        &highCutSlopeSlider
     };
 }

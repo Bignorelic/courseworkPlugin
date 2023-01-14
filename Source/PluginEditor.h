@@ -40,7 +40,9 @@ private:
     CustomRotarySlider lowCutFreqSlider,
         highCutFreqSlider,
         driveSlider,
-        postGainSlider;
+        postGainSlider,
+        lowCutSlopeSlider,
+        highCutSlopeSlider;
 
     std::vector<juce::Component*> getComps();
 
