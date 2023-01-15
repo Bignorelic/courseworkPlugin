@@ -182,7 +182,7 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     auto chainSettings = getChainSettings(apvts);
 
 
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
+    auto cutCoefficients = makeLowCutFilter(chainSettings, getSampleRate());
  
     auto& leftLowCut = leftChain.get <ChainPositions::LowCut>();
     updateFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
@@ -191,7 +191,7 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     updateFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
 
 
-    auto highCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq, getSampleRate(), 2 * (chainSettings.highCutSlope + 1));
+    auto highCutCoefficients = makeHighCutFilter(chainSettings, getSampleRate());
 
     auto& leftHighCut = leftChain.get <ChainPositions::HighCut>();
     updateFilter(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
@@ -264,7 +264,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     return settings;
 }
 
-void CourseworkPluginAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replacements)
+void /*CourseworkPluginAudioProcessor::*/updateCoefficients(Coefficients& old, const Coefficients& replacements)
 {
     *old = *replacements;
 }
