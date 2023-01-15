@@ -170,6 +170,13 @@ void CourseworkPluginAudioProcessorEditor::timerCallback()
     {
         //update the monochain
         auto chainSettings = getChainSettings(audioProcessor.apvts);
+
+        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
+        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
+
+        updateFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
+        updateFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
+
         //repaint
         repaint();
     }
