@@ -36,6 +36,7 @@ private:
     // access the processor object that created it.
     CourseworkPluginAudioProcessor& audioProcessor;
 
+    //making the sliders
     CustomRotarySlider lowCutFreqSlider,
         highCutFreqSlider,
         driveSlider,
@@ -43,6 +44,18 @@ private:
 
     juce::Slider lowCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
     juce::Slider highCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
+
+    //connecting the sliders to the parameters
+    using APVTS = juce::AudioProcessorValueTreeState;
+    using Attachment = APVTS::SliderAttachment;
+
+    Attachment lowCutFreqSliderAttachment,
+                highCutFreqSliderAttachment,
+                driveSliderAttachment,
+                postGainSliderAttachment,
+                lowCutSlopeSelectAttachment,
+                highCutSlopeSelectAttachment;
+
 
 
     std::vector<juce::Component*> getComps();

@@ -11,7 +11,13 @@
 
 //==============================================================================
 CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), 
+    lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
+    highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
+    driveSliderAttachment(audioProcessor.apvts,"Drive", driveSlider),
+    postGainSliderAttachment(audioProcessor.apvts,"PostGain", driveSlider),
+    lowCutSlopeSelectAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
+    highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
