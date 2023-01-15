@@ -37,12 +37,80 @@ CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
 //==============================================================================
 void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
+    using namespace juce;
+   
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll (Colours::black);
 
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    //making the response curve that shows what the filters are doing
+    auto bounds = getLocalBounds();
+
+    //setting bounds
+    auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
+    auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
+    auto spectrumW = spectrumArea.getWidth();
+    auto waveformArea = visualiserArea;
+    auto waveformW = waveformArea.getWidth();
+
+    //getting the chains to read off
+    auto& lowcut = monoChain.get<ChainPositions::LowCut>();
+    auto& highcut = monoChain.get<ChainPositions::HighCut>();
+
+    auto sampleRate = audioProcessor.getSampleRate();
+
+    std::vector<double> mags;
+
+    mags.resize(spectrumW);
+
+    for (int i = 0; i < spectrumW; ++i)
+    {
+        double mag = 1.f;
+        auto freq = mapToLog10(double(i) / double(spectrumW), 20.0, 20000.0);
+
+        if (!lowcut.isBypassed<0>())
+            mag *= lowcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!lowcut.isBypassed<1>())
+            mag *= lowcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!lowcut.isBypassed<2>())
+            mag *= lowcut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!lowcut.isBypassed<3>())
+            mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (!highcut.isBypassed<0>())
+            mag *= highcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!highcut.isBypassed<1>())
+            mag *= highcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!highcut.isBypassed<2>())
+            mag *= highcut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!highcut.isBypassed<3>())
+            mag *= highcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        mags[i] = Decibels::gainToDecibels(mag);
+    }
+
+    Path responseCurve;
+
+    const double outputMin = spectrumArea.getBottom();
+    const double outputMax = spectrumArea.getY();
+    auto map = [outputMin, outputMax](double input)
+    {
+        return jmap(input, -24.0, 24.0, outputMin, outputMax);
+    };
+
+    responseCurve.startNewSubPath(spectrumArea.getX(), map(mags.front()));
+
+    for (size_t i = 1; i < mags.size(); ++i)
+    {
+        responseCurve.lineTo(spectrumArea.getX() + i, map(mags[i]));
+    };
+
+    //draws a box for the area
+    g.setColour(Colours::lavender);
+    g.drawRoundedRectangle(spectrumArea.toFloat(), 4.f, 1.f);
+
+    //draws the curve
+    g.setColour(Colours::white);
+    g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
 void CourseworkPluginAudioProcessorEditor::resized()
