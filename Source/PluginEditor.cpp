@@ -9,24 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-//==============================================================================
-CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p), 
-    lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
-    highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
-    driveSliderAttachment(audioProcessor.apvts,"Drive", driveSlider),
-    postGainSliderAttachment(audioProcessor.apvts,"PostGain", driveSlider),
-    lowCutSlopeSelectAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
-    highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect)
+ResponseCurveComponent::ResponseCurveComponent(CourseworkPluginAudioProcessor& p) : audioProcessor(p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-
-    for (auto* comp : getComps())
-    {
-        addAndMakeVisible(comp);
-    }
-
     const auto& params = audioProcessor.getParameters();
     for (auto param : params)
     {
@@ -34,11 +18,9 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     }
 
     startTimerHz(60);
-
-    setSize (800, 400);
 }
 
-CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
+ResponseCurveComponent::~ResponseCurveComponent()
 {
     const auto& params = audioProcessor.getParameters();
     for (auto param : params)
@@ -47,22 +29,43 @@ CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
     }
 }
 
-//==============================================================================
-void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
+void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
+{
+    parametersChanged.set(true);
+}
+
+void ResponseCurveComponent::timerCallback()
+{
+    if (parametersChanged.compareAndSetBool(false, true))
+    {
+        //update the monochain
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+
+        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
+        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
+
+        updateFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
+        updateFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
+
+        //repaint
+        repaint();
+    }
+}
+
+void ResponseCurveComponent::paint(juce::Graphics& g)
 {
     using namespace juce;
-   
+
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::black);
+    g.fillAll(Colours::black);
 
     //making the response curve that shows what the filters are doing
     auto bounds = getLocalBounds();
 
     //setting bounds
-    auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
-    auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
+    auto spectrumArea = bounds;
     auto spectrumW = spectrumArea.getWidth();
-    auto waveformArea = visualiserArea;
+    auto waveformArea = bounds;
     auto waveformW = waveformArea.getWidth();
 
     //getting the chains to read off
@@ -126,6 +129,40 @@ void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
     g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
+//==============================================================================
+CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor& p)
+    : AudioProcessorEditor (&p), audioProcessor (p),
+    responseCurveComponent(audioProcessor),
+    lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
+    highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
+    driveSliderAttachment(audioProcessor.apvts,"Drive", driveSlider),
+    postGainSliderAttachment(audioProcessor.apvts,"PostGain", driveSlider),
+    lowCutSlopeSelectAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
+    highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect)
+{
+    // Make sure that before the constructor has finished, you've set the
+    // editor's size to whatever you need it to be.
+
+    for (auto* comp : getComps())
+    {
+        addAndMakeVisible(comp);
+    }
+    setSize (800, 400);
+}
+
+CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
+{
+}
+
+//==============================================================================
+void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
+{
+    using namespace juce;
+   
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll (Colours::black);
+}
+
 void CourseworkPluginAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
@@ -137,6 +174,8 @@ void CourseworkPluginAudioProcessorEditor::resized()
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
     auto waveformArea = visualiserArea;
+
+    responseCurveComponent.setBounds(spectrumArea);
 
     auto filterArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
     auto lowCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.5);
@@ -158,30 +197,6 @@ void CourseworkPluginAudioProcessorEditor::resized()
     driveSlider.setBounds(driveArea.removeFromRight(driveArea.getWidth() * 0.89));
     postGainSlider.setBounds(postGainArea.removeFromRight(postGainArea.getWidth() * 0.89));
 }
-
-void CourseworkPluginAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
-{
-    parametersChanged.set(true);
-}
-
-void CourseworkPluginAudioProcessorEditor::timerCallback()
-{
-    if (parametersChanged.compareAndSetBool(false, true))
-    {
-        //update the monochain
-        auto chainSettings = getChainSettings(audioProcessor.apvts);
-
-        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
-        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
-
-        updateFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
-        updateFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
-
-        //repaint
-        repaint();
-    }
-}
-
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
 {
     return
@@ -191,6 +206,7 @@ std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
         &driveSlider,
         &postGainSlider,
         &lowCutSlopeSelect,
-        &highCutSlopeSelect
+        &highCutSlopeSelect,
+        &responseCurveComponent
     };
 }
