@@ -11,11 +11,64 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-struct CustomRotarySlider : juce::Slider
+struct LookAndFeel : juce::LookAndFeel_V4
 {
-    CustomRotarySlider() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox)
+    void drawRotarySlider(juce::Graphics&,
+        int x, int y, int width, int height,
+        float sliderPosProportional,
+        float rotaryStartAngle,
+        float rotaryEndAngle,
+        juce::Slider&) override {}
+};
+
+struct RotarySliderWithLabels : juce::Slider
+{
+    RotarySliderWithLabels(juce::RangedAudioParameter& rap, const juce::String& unitSuffix) : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
+    param(&rap), 
+    suffix(unitSuffix)
     {
+        setLookAndFeel(&lnf);
     }
+
+    ~RotarySliderWithLabels()
+    {
+        setLookAndFeel(nullptr);
+    }
+
+    void paint(juce::Graphics& g) override {}
+    juce::Rectangle<int> getSliderBounds() const;
+    int getTextHeight() const { return 14; }
+    juce::String getDisplayString() const;
+
+private:
+    LookAndFeel lnf;
+
+    juce::RangedAudioParameter* param;
+    juce::String suffix;
+};
+
+struct LinearSliderWithLabels : juce::Slider
+{
+    LinearSliderWithLabels(juce::RangedAudioParameter& rap, const juce::String& unitSuffix) : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
+        param(&rap),
+        suffix(unitSuffix)
+    {
+        setLookAndFeel(&lnf);
+    }
+
+    ~LinearSliderWithLabels()
+    {
+        setLookAndFeel(nullptr);
+    }
+    void paint(juce::Graphics& g) override {}
+    juce::Rectangle<int> getSliderBounds() const;
+    int getTextHeight() const { return 14; }
+    juce::String getDisplayString() const;
+private:
+    LookAndFeel lnf;
+
+    juce::RangedAudioParameter* param;
+    juce::String suffix;
 };
 
 struct ResponseCurveComponent : juce::Component,
@@ -60,13 +113,16 @@ private:
     CourseworkPluginAudioProcessor& audioProcessor;
 
     //making the sliders
-    CustomRotarySlider lowCutFreqSlider,
+    RotarySliderWithLabels lowCutFreqSlider,
         highCutFreqSlider,
         driveSlider,
         postGainSlider;
 
-    juce::Slider lowCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
-    juce::Slider highCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
+    LinearSliderWithLabels lowCutSlopeSelect,
+        highCutSlopeSelect;
+
+    /*juce::Slider lowCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
+    juce::Slider highCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);*/
 
     ResponseCurveComponent responseCurveComponent;
 

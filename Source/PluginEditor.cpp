@@ -132,6 +132,14 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 //==============================================================================
 CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
+
+    highCutFreqSlider   (*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
+    lowCutFreqSlider    (*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"),
+    driveSlider         (*audioProcessor.apvts.getParameter("Drive"), ""),
+    postGainSlider      (*audioProcessor.apvts.getParameter("PostGain"), "dB"),
+    lowCutSlopeSelect   (*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
+    highCutSlopeSelect  (*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
+
     responseCurveComponent(audioProcessor),
     lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
     highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
