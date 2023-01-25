@@ -31,25 +31,41 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g,
     g.setColour(Colour(209u, 224u, 248u));
     g.drawEllipse(bounds, 1.f);
 
-    auto centre = bounds.getCentre();
+    if (auto* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider))
+    {
+        auto centre = bounds.getCentre();
 
-    Path p;
+        Path p;
 
-    Rectangle<float> r;
-    r.setLeft(centre.getX() - 2);
-    r.setRight(centre.getX() + 2);
-    r.setTop(bounds.getY());
-    r.setBottom(centre.getY() - 25);
+        Rectangle<float> r;
+        r.setLeft(centre.getX() - 2);
+        r.setRight(centre.getX() + 2);
+        r.setTop(bounds.getY());
+        r.setBottom(centre.getY() - rswl->getTextHeight() * 1.5);
 
-    p.addRectangle(r);
+        p.addRoundedRectangle(r, 2.f);
 
-    jassert(rotaryStartAngle < rotaryEndAngle);
+        jassert(rotaryStartAngle < rotaryEndAngle);
 
-    auto sliderAngRad = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
+        auto sliderAngRad = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
 
-    p.applyTransform(AffineTransform().rotated(sliderAngRad, centre.getX(), centre.getY()));
+        p.applyTransform(AffineTransform().rotated(sliderAngRad, centre.getX(), centre.getY()));
 
-    g.fillPath(p);
+        g.fillPath(p);
+
+        g.setFont(rswl->getTextHeight());
+        auto text = rswl->getDisplayString();
+        auto strWidth = g.getCurrentFont().getStringWidth(text);
+
+        r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
+        r.setCentre(bounds.getCentre());
+
+        g.setColour(Colours::black);
+        g.fillRect(r);
+
+        g.setColour(Colours::white);
+        g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
+    }
 }
 
 //===============================================================================//
@@ -96,6 +112,11 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     r.setY(5);
 
     return r;
+}
+
+juce::String RotarySliderWithLabels::getDisplayString() const
+{
+    return juce::String(getValue());
 }
 
 //===============================================================================//
