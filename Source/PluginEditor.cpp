@@ -149,6 +149,8 @@ juce::String RotarySliderWithLabels::getDisplayString() const
 
         str << suffix;
     }
+
+    return str;
 }
 
 //===============================================================================//
