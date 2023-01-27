@@ -81,10 +81,10 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
 
     auto sliderBoudns = getSliderBounds();
 
-    g.setColour(Colours::red);
+    /*g.setColour(Colours::red);
     g.drawRect(getLocalBounds());
     g.setColour(Colours::yellow);
-    g.drawRect(sliderBoudns);
+    g.drawRect(sliderBoudns);*/
 
     getLookAndFeel().drawRotarySlider(g, 
         sliderBoudns.getX(), 
@@ -108,8 +108,16 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     size -= getTextBoxHeight() * 2;
     juce::Rectangle<int> r;
     r.setSize(size, size);
-    r.setCentre(bounds.getCentreX(), 0);
-    r.setY(5);
+
+    if (suffix == "" || suffix =="dB")
+    {
+        r.setCentre(bounds.getCentreX(), bounds.getCentreY());
+    }
+    else
+    {
+        r.setCentre(bounds.getCentreX(), 0);
+        r.setY(20);
+    }
 
     return r;
 }
@@ -286,12 +294,12 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     lowCutSlopeSelect   (*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
     highCutSlopeSelect  (*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
 
-    responseCurveComponent(audioProcessor),
-    lowCutFreqSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
-    highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
-    driveSliderAttachment(audioProcessor.apvts,"Drive", driveSlider),
-    postGainSliderAttachment(audioProcessor.apvts,"PostGain", driveSlider),
-    lowCutSlopeSelectAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
+    responseCurveComponent      (audioProcessor),
+    lowCutFreqSliderAttachment  (audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
+    highCutFreqSliderAttachment (audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
+    driveSliderAttachment       (audioProcessor.apvts,"Drive", driveSlider),
+    postGainSliderAttachment    (audioProcessor.apvts,"PostGain", driveSlider),
+    lowCutSlopeSelectAttachment (audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
     highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect)
 {
     // Make sure that before the constructor has finished, you've set the
