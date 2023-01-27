@@ -19,7 +19,7 @@ struct LookAndFeel : juce::LookAndFeel_V4
         float minSliderPos,
         float maxSliderPos,
         const juce::Slider::SliderStyle,
-        juce::Slider&) override {}
+        juce::Slider&) override;
 
     void drawRotarySlider(juce::Graphics&,
         int x, int y, int width, int height,
@@ -68,7 +68,7 @@ struct LinearSliderWithLabels : juce::Slider
     {
         setLookAndFeel(nullptr);
     }
-    void paint(juce::Graphics& g) override {}
+    void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const { return 14; }
     juce::String getDisplayString() const;

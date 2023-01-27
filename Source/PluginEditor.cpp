@@ -160,7 +160,78 @@ juce::String RotarySliderWithLabels::getDisplayString() const
 
     return str;
 }
+//===============================================================================//
+//===============================================================================//
 
+void LookAndFeel::drawLinearSlider(juce::Graphics& g,
+    int x, 
+    int y, 
+    int width, 
+    int height,
+    float sliderPos,
+    float minSliderPos,
+    float maxSliderPos,
+    const juce::Slider::SliderStyle,
+    juce::Slider& slider)
+{
+    using namespace juce;
+
+    auto bounds = Rectangle<float>(x, y, width, height);
+
+    g.setColour(Colour(27u, 19u, 37u));
+    g.fillRoundedRectangle(bounds, 2.f);
+
+    g.setColour(Colour(209u, 224u, 248u));
+    g.drawRoundedRectangle(bounds, 2.f, 1.f);
+
+    auto centre = bounds.getCentre();
+
+    Path p;
+   
+    Rectangle<float> r;
+    r.setLeft(centre.getX() - 2);
+    r.setRight(centre.getY() + 2);
+    r.setCentre(centre);
+    r.setSize(4.f, 4.f);
+
+    p.addEllipse(r);
+
+    jassert(minSliderPos < maxSliderPos);
+
+    auto sliderPosition = jmap(sliderPos,minSliderPos, maxSliderPos, 0.f, 1.f);
+
+    p.applyTransform(AffineTransform().translated(sliderPosition * 10, 0.f));
+
+    g.fillPath(p);
+}
+
+void LinearSliderWithLabels::paint(juce::Graphics& g)
+{
+    using namespace juce;
+
+    auto range = getRange();
+
+    auto sliderBounds = getSliderBounds();
+
+    getLookAndFeel().drawLinearSlider(g,
+        sliderBounds.getX(),
+        sliderBounds.getY(),
+        sliderBounds.getWidth(),
+        sliderBounds.getHeight(),
+        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
+        0.0,
+        1.0,
+        LinearHorizontal,
+        *this);
+}
+
+juce::Rectangle<int> LinearSliderWithLabels::getSliderBounds() const
+{
+    return getLocalBounds();
+}
+
+
+//===============================================================================//
 //===============================================================================//
 
 ResponseCurveComponent::ResponseCurveComponent(CourseworkPluginAudioProcessor& p) : audioProcessor(p)
