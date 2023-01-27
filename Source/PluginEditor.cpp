@@ -178,31 +178,45 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
 
     auto bounds = Rectangle<float>(x, y, width, height);
 
+    //surroundng box
     g.setColour(Colour(27u, 19u, 37u));
     g.fillRoundedRectangle(bounds, 2.f);
 
     g.setColour(Colour(209u, 224u, 248u));
-    g.drawRoundedRectangle(bounds, 2.f, 1.f);
+    g.drawRoundedRectangle(bounds, 5.f, 1.f);
 
     auto centre = bounds.getCentre();
 
+    //line within the box
+    auto sliderLine = bounds;
+    sliderLine.setY(sliderLine.getHeight() * 0.5);
+    sliderLine.setX(sliderLine.getWidth() * 0.1);
+    sliderLine.setHeight(sliderLine.getHeight() * 0.05);
+    sliderLine.setWidth(sliderLine.getWidth() * 0.8);
+
+    g.setColour(Colour(106u, 116u, 133u));
+    g.drawRoundedRectangle(sliderLine, 2.f, 1.f);
+
+    //dot
     Path p;
    
     Rectangle<float> r;
-    r.setLeft(centre.getX() - 2);
-    r.setRight(centre.getY() + 2);
-    r.setCentre(centre);
-    r.setSize(4.f, 4.f);
+    //r.setLeft(bounds.getX());
+    //r.setRight(centre.getY());
+    r.setSize(6.f, 6.f);
+    r.setCentre(bounds.getWidth() * 0.1, centre.getY());
+
 
     p.addEllipse(r);
 
     jassert(minSliderPos < maxSliderPos);
 
-    auto sliderPosition = jmap(sliderPos,minSliderPos, maxSliderPos, 0.f, 1.f);
+    auto sliderPosition = jmap(sliderPos, 0.f, 1.f, minSliderPos, maxSliderPos);
 
-    p.applyTransform(AffineTransform().translated(sliderPosition * 10, 0.f));
+    p.applyTransform(AffineTransform().translated(sliderPos * 3.2, 0.f));
 
-    g.fillPath(p);
+    g.setColour(Colour(209u, 224u, 248u));
+    g.fillPath(p);    
 }
 
 void LinearSliderWithLabels::paint(juce::Graphics& g)
@@ -217,10 +231,10 @@ void LinearSliderWithLabels::paint(juce::Graphics& g)
         sliderBounds.getX(),
         sliderBounds.getY(),
         sliderBounds.getWidth(),
-        sliderBounds.getHeight(),
-        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
+        sliderBounds.getHeight()*.5,
+        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, sliderBounds.getWidth() * 0.25),
         0.0,
-        1.0,
+        sliderBounds.getWidth(),
         LinearHorizontal,
         *this);
 }
