@@ -86,14 +86,16 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     g.setColour(Colours::yellow);
     g.drawRect(sliderBoudns);*/
 
-    getLookAndFeel().drawRotarySlider(g, 
-        sliderBoudns.getX(), 
-        sliderBoudns.getY(), 
-        sliderBoudns.getWidth(), 
-        sliderBoudns.getHeight(), 
-        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0), 
-        startAng, 
-        endAng, 
+    getLookAndFeel().drawRotarySlider(g,
+        sliderBoudns.getX(),
+        sliderBoudns.getY(),
+        sliderBoudns.getWidth(),
+        sliderBoudns.getHeight(),
+        //mapFromLog10((float)jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0), 2.f, 10.f),
+        //mapToLog10((float)getValue(), 10.f, 20000.f),
+        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
+        startAng,
+        endAng,
         *this);
 }
 
