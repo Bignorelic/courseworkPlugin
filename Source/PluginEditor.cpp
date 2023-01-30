@@ -334,10 +334,10 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(Colours::black);
 
-    g.drawImage(background, getRenderArea().toFloat());
+    g.drawImage(background, getLocalBounds().toFloat());
 
     //making the response curve that shows what the filters are doing
-    auto bounds = getRenderArea();
+    auto bounds = getAnalysisArea();
 
     //setting bounds
     auto spectrumArea = bounds;
@@ -399,7 +399,7 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 
     //draws a box for the area
     g.setColour(Colours::lavender);
-    g.drawRoundedRectangle(spectrumArea.toFloat(), 4.f, 1.f);
+    g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
 
     //draws the curve
     g.setColour(Colours::white);
@@ -425,6 +425,7 @@ void ResponseCurveComponent::resized()
         2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000
     };
 
+    //getting values for the bouneding area so its quick to use
     auto renderArea = getAnalysisArea();
     auto left = renderArea.getX();
     auto right = renderArea.getRight();
@@ -432,31 +433,79 @@ void ResponseCurveComponent::resized()
     auto bottom = renderArea.getBottom();
     auto width = renderArea.getWidth();
 
-    //Array<float> xs;
-    //for (auto f : mainFreqs)
-    //{
-    //    auto normX = mapFromLog10(f, 10.f, 20000.f);
-    //    xs.add(left + width * normX);
-    //}
-
-    g.setColour(Colours::white);
-    for (auto f : mainFreqs)
-    {
-        auto normX = mapFromLog10(f, 10.f, 20000.f);
-
-        g.drawVerticalLine(getWidth() * normX, 0.f, getHeight());
-    }  
-
-    g.setColour(Colours::grey);
+    //vertical lines for the sub frequencies
+    g.setColour(Colours::darkgrey);
     for (auto f : subFreqs)
     {
         auto normX = mapFromLog10(f, 10.f, 20000.f);
 
-        g.drawVerticalLine(getWidth() * normX, 0.f, getHeight());
+        g.drawVerticalLine(getWidth() * normX, top - 4, bottom + 4);
     }
 
-    //g.setColour(Colours::white);
+    //horizontal lines for gain
+    Array<float> gain
+    {
+        -24,-12,0,12,24
+    };
+
+    for (auto gdB : gain)
+    {
+        auto y = jmap(gdB, -24.f, 24.f, float(bottom), float(top));
+        g.setColour(gdB == 0.f ? Colour(Colours::ghostwhite) : Colour(Colours::grey));
+        g.drawHorizontalLine(y, left, right);
+    }
+
+    //vertical lines for frequency
+    Array<float> xs;
+    for (auto f : mainFreqs)
+    {
+        auto normX = mapFromLog10(f, 10.f, 20000.f);
+        xs.add(left + width * normX);
+    }
+
+    g.setColour(Colours::white);
+    for (auto x : xs)
+    {
+        g.drawVerticalLine(x, top - 4, bottom + 4);
+    }  
+
+    //g.setColour(Colours::orange);
     //g.drawRect(getRenderArea());
+    //g.setColour(Colours::green);
+    //g.drawRect(getAnalysisArea());
+
+
+    g.setColour(Colours::lightgrey);
+    const int fontHeight = 10;
+    g.setFont(fontHeight);
+
+    for (int i = 0; i < mainFreqs.size(); ++i)
+    {
+        auto f = mainFreqs[i];
+        auto x = xs[i];
+
+        bool addK = false;
+        String str;
+        if (f > 999.f)
+        {
+            addK = true;
+            f /= 1000.f;
+        }
+
+        str << f;
+        if (addK)
+            str << "k";
+        str << "Hz";
+
+        auto textWidth = g.getCurrentFont().getStringWidth(str);
+
+        Rectangle<int> r;
+        r.setSize(textWidth, fontHeight);
+        r.setCentre(x, 0);
+        r.setY(1);
+
+        g.drawFittedText(str, r, juce::Justification::centred, 1);
+    }
 }
 
 juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
@@ -471,8 +520,8 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
 juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea()
 {
     auto bounds = getRenderArea();
-    //bounds.removeFromTop(4);
-    //bounds.removeFromBottom(4);
+    bounds.removeFromTop(4);
+    bounds.removeFromBottom(4);
     return bounds;
 }
 
