@@ -275,8 +275,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
 
     //making variables for the filter frequencies
     //normalisableRange -> (lower frequency, upper frequency, frequency step, skew)
-    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", juce::NormalisableRange<float>(10.f, 20000.f, 1.f, 0.25f), 10.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq", juce::NormalisableRange<float>(10.f, 20000.f, 1.f, 0.25f), 20000.f));
 
     //making different slopes: 12db/Oct, 24db/Oct, 36db/Oct and 48db/Oct
     juce::StringArray stringArray;
