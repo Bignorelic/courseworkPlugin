@@ -404,6 +404,35 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
+void ResponseCurveComponent::resized()
+{
+    using namespace juce;
+    background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);  
+
+    Graphics g(background);
+
+    Array<float> mainFreqs
+    {
+        0, 100, 1000, 10000
+    };
+
+    Array<float> freqs
+    {
+        20, 30, 40, 50,
+        200, 300, 400, 500,
+        2000, 3000, 4000, 5000,
+        20000
+    };
+
+    g.setColour(Colours::white);
+    for (auto f : mainFreqs)
+    {
+        auto normX = mapFromLog10(f, 0.f, 20000.f);
+
+        g.drawVerticalLine(getWidth() * normX, 0.f, getHeight());
+    }  
+}
+
 //==============================================================================
 CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
