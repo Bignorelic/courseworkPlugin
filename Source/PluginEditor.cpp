@@ -415,7 +415,7 @@ void ResponseCurveComponent::resized()
 
     Array<float> mainFreqs
     {
-        100, 1000, 10000
+        10, 100, 1000, 10000
     };
     
     Array<float> subFreqs
@@ -466,7 +466,8 @@ void ResponseCurveComponent::resized()
     g.setColour(Colours::white);
     for (auto x : xs)
     {
-        g.drawVerticalLine(x, top - 4, bottom + 4);
+        if (x != left + width * mapFromLog10(10.f, 10.f, 20000.f))
+            g.drawVerticalLine(x, top - 4, bottom + 4);
     }  
 
     //g.setColour(Colours::orange);
@@ -474,7 +475,7 @@ void ResponseCurveComponent::resized()
     //g.setColour(Colours::green);
     //g.drawRect(getAnalysisArea());
 
-
+    //adding labels for main frequencies
     g.setColour(Colours::lightgrey);
     const int fontHeight = 10;
     g.setFont(fontHeight);
@@ -513,7 +514,7 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
     auto bounds = getLocalBounds();
 
     bounds.removeFromTop(12);
-
+    bounds.removeFromLeft(20);
     return bounds;
 }
 
