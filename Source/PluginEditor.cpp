@@ -185,7 +185,7 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
     g.fillRoundedRectangle(bounds, 2.f);
 
     g.setColour(Colour(209u, 224u, 248u));
-    g.drawRoundedRectangle(bounds, 5.f, 1.f);
+    g.drawRoundedRectangle(bounds, 10.f, 1.f);
 
     if (auto* rswl = dynamic_cast<LinearSliderWithLabels*>(&slider))
     {
