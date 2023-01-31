@@ -568,6 +568,9 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
+    addAndMakeVisible(audioProcessor.waveformViewer);
+    audioProcessor.waveformViewer.setColours(juce::Colours::black, juce::Colours::white);
+
     for (auto* comp : getComps())
     {
         addAndMakeVisible(comp);
@@ -599,6 +602,7 @@ void CourseworkPluginAudioProcessorEditor::resized()
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
     auto waveformArea = visualiserArea;
+    audioProcessor.waveformViewer.setBounds(waveformArea);
 
     responseCurveComponent.setBounds(spectrumArea);
 

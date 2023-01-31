@@ -19,9 +19,12 @@ CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), waveformViewer(1)
 #endif
 {
+    //settings for the waveform visualiser
+    waveformViewer.setRepaintRate(60);
+    waveformViewer.setBufferSize(128);
 }
 
 CourseworkPluginAudioProcessor::~CourseworkPluginAudioProcessor()
@@ -211,6 +214,9 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     leftChain.process(leftContext);
     rightChain.process(rightContext);
 
+
+    //waveform viewer
+    waveformViewer.pushBuffer(buffer);
 }
 
 //==============================================================================
