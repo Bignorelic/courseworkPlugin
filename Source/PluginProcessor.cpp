@@ -24,7 +24,7 @@ CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
 {
     //settings for the waveform visualiser
     waveformViewer.setRepaintRate(60);
-    waveformViewer.setBufferSize(128);
+    waveformViewer.setBufferSize(64);
 }
 
 CourseworkPluginAudioProcessor::~CourseworkPluginAudioProcessor()

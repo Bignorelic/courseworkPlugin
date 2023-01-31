@@ -625,6 +625,11 @@ void CourseworkPluginAudioProcessorEditor::resized()
 
     driveSlider.setBounds(driveArea.removeFromRight(driveArea.getWidth() * 0.89));
     postGainSlider.setBounds(postGainArea.removeFromRight(postGainArea.getWidth() * 0.89));
+
+
+    //waveform size specifics
+    //juce::Graphics g(background);
+    //g.setColour(juce::Colours::white);
 }
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
 {
