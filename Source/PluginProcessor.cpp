@@ -10,6 +10,19 @@
 #include "PluginEditor.h"
 
 //==============================================================================
+
+class Visualiser : public juce::AudioVisualiserComponent
+{
+public:
+    Visualiser() : AudioVisualiserComponent(1)
+    {
+        setBufferSize(64);
+        setSamplesPerBlock(256);
+    }
+};
+
+//==============================================================================
+//==============================================================================
 CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -23,8 +36,9 @@ CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
 #endif
 {
     //settings for the waveform visualiser
-    waveformViewer.setRepaintRate(60);
-    waveformViewer.setBufferSize(64);
+    waveformViewer.setRepaintRate(30);
+    waveformViewer.setBufferSize(1024);
+    waveformViewer.setSamplesPerBlock(16);
 }
 
 CourseworkPluginAudioProcessor::~CourseworkPluginAudioProcessor()

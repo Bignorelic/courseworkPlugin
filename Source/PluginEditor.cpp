@@ -9,6 +9,18 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+//===============================================================================//
+
+//class Visualiser : public juce::AudioVisualiserComponent
+//{
+//
+//};
+
+
+//===============================================================================//
+//===============================================================================//
+
+
 //drawing the circular sliders
 
 void LookAndFeel::drawRotarySlider(juce::Graphics& g,
@@ -236,8 +248,6 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
         g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
     }
 }
-
-
 
 void LinearSliderWithLabels::paint(juce::Graphics& g)
 {
@@ -569,6 +579,7 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     // editor's size to whatever you need it to be.
 
     addAndMakeVisible(audioProcessor.waveformViewer);
+    //audioProcessor.waveformViewer.setColours(juce::Colour(0.f, 0.f, 0.f, 0.f), juce::Colours::white);
     audioProcessor.waveformViewer.setColours(juce::Colours::black, juce::Colours::white);
 
     for (auto* comp : getComps())
@@ -589,6 +600,20 @@ void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
    
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (Colours::black);
+
+    auto bounds = getLocalBounds();
+
+    auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
+    auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
+    auto waveformArea = visualiserArea;
+    audioProcessor.waveformViewer.setBounds(waveformArea.withSizeKeepingCentre(298, 100));
+    auto waveformBounds = waveformArea.withSizeKeepingCentre(300, 120);
+
+    g.setColour(Colours::lavender);
+    g.drawRoundedRectangle(waveformBounds.toFloat(), 4.f, 1.f);
+    g.setColour(Colours::grey);
+    g.drawHorizontalLine(24, waveformArea.getX(), waveformArea.getRight());
+    g.drawHorizontalLine(waveformArea.getHeight() - 24, waveformArea.getX(), waveformArea.getRight());
 }
 
 void CourseworkPluginAudioProcessorEditor::resized()
@@ -602,7 +627,7 @@ void CourseworkPluginAudioProcessorEditor::resized()
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
     auto waveformArea = visualiserArea;
-    audioProcessor.waveformViewer.setBounds(waveformArea);
+    //audioProcessor.waveformViewer.setBounds(waveformArea);
 
     responseCurveComponent.setBounds(spectrumArea);
 
