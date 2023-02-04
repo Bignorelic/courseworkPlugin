@@ -32,7 +32,7 @@ CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), waveformViewer(1)
+                       ), waveformViewer(2)
 #endif
 {
     //settings for the waveform visualiser
