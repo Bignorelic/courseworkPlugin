@@ -113,10 +113,12 @@ void CourseworkPluginAudioProcessor::updateLowCutFilters(const ChainSettings& ch
 
     //low cut filter in the left channel
     auto& leftLowCut = leftChain.get <ChainPositions::LowCut>();
-    updateFilter(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
-
-    //low cut filter in the right channel
     auto& rightLowCut = rightChain.get <ChainPositions::LowCut>();
+
+    leftChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
+    rightChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
+
+    updateFilter(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
     updateFilter(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
 }
 
@@ -126,9 +128,12 @@ void CourseworkPluginAudioProcessor::updateHighCutFilters(const ChainSettings& c
     auto highCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq, getSampleRate(), 2 * (chainSettings.highCutSlope + 1));
 
     auto& leftHighCut = leftChain.get <ChainPositions::HighCut>();
-    updateFilter(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
-
     auto& rightHighCut = rightChain.get <ChainPositions::HighCut>();
+
+    leftChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
+    rightChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
+
+    updateFilter(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
     updateFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
 }
 
@@ -289,6 +294,9 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
     settings.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
     settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
+    
+    settings.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
+    settings.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
 
     return settings;
 }
@@ -324,6 +332,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     //parameters for distortion
     layout.add(std::make_unique<juce::AudioParameterFloat>("Drive", "Drive", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("PostGain", "PostGain", juce::NormalisableRange<float>(-12.f, 0.f, 0.01f, 1.f), 0.f));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
 
     return layout;
 }
