@@ -393,6 +393,7 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
     }
 
     const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+    //const auto fftSize = 44000;
 
     const auto binWidth = sampleRate / (double)fftSize;
 

@@ -36,7 +36,7 @@ CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
 #endif
 {
     //settings for the waveform visualiser
-    waveformViewer.setRepaintRate(30);
+    waveformViewer.setRepaintRate(60);
     waveformViewer.setBufferSize(1024);
     waveformViewer.setSamplesPerBlock(16);
 }
