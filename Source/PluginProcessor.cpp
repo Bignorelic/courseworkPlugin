@@ -146,6 +146,8 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
     auto& rightHighCut = rightChain.get <ChainPositions::HighCut>();
     updateFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
 
+    leftChannelFifo.prepare(samplesPerBlock);
+    rightChannelFifo.prepare(samplesPerBlock);
 }
 
 void CourseworkPluginAudioProcessor::releaseResources()
@@ -231,6 +233,9 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     //waveform viewer
     waveformViewer.pushBuffer(buffer);
+
+    leftChannelFifo.update(buffer);
+    rightChannelFifo.update(buffer);
 }
 
 //==============================================================================
