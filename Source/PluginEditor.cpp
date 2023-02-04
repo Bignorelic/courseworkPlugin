@@ -457,6 +457,8 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         responseCurve.lineTo(spectrumArea.getX() + i, map(mags[i]));
     };
 
+    leftChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
+
     g.setColour(Colours::slateblue);
     g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
 
