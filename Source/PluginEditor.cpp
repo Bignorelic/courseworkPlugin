@@ -655,7 +655,7 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     lowCutFreqSliderAttachment  (audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
     highCutFreqSliderAttachment (audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
     driveSliderAttachment       (audioProcessor.apvts,"Drive", driveSlider),
-    postGainSliderAttachment    (audioProcessor.apvts,"PostGain", driveSlider),
+    postGainSliderAttachment    (audioProcessor.apvts,"PostGain", postGainSlider),
     lowCutSlopeSelectAttachment (audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
     highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect)
 {
