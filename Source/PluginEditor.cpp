@@ -80,8 +80,6 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g,
     }
 }
 
-//===============================================================================//
-
 void RotarySliderWithLabels::paint(juce::Graphics &g)
 {
     using namespace juce;
@@ -174,7 +172,7 @@ juce::String RotarySliderWithLabels::getDisplayString() const
 
     return str;
 }
-//===============================================================================//
+
 //===============================================================================//
 
 void LookAndFeel::drawLinearSlider(juce::Graphics& g,
@@ -284,6 +282,46 @@ juce::String LinearSliderWithLabels::getDisplayString() const
     str << suffix;
 
     return str;
+}
+
+//===============================================================================//
+
+void LookAndFeel::drawToggleButton(juce::Graphics& g,
+    juce::ToggleButton& toggleButton,
+    bool shouldDrawBurronAsHighlighted,
+    bool shouldDrawButtonAsDown)
+{
+    using namespace juce;
+    
+    Path powerButton;
+
+    auto bounds = toggleButton.getLocalBounds();
+    auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 12;
+    auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
+    r.setCentre(r.getCentreX(), r.getCentreY()+5);
+
+    float ang = 30.f;
+    size -= 10;
+
+    powerButton.addCentredArc(r.getCentreX(), 
+        r.getCentreY(), 
+        size * 0.5, 
+        size * 0.5, 
+        0.f, 
+        degreesToRadians(ang), 
+        degreesToRadians(360.f - ang), 
+        true);
+
+    powerButton.startNewSubPath(r.getCentreX(), r.getY());
+    powerButton.lineTo(r.getCentre());
+    
+    PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
+    
+    auto colour = toggleButton.getToggleState() ? Colours::dimgrey : Colours::aliceblue;
+
+    g.setColour(colour);
+    g.strokePath(powerButton, pst);
+    g.drawEllipse(r, 2);
 }
 
 
@@ -681,11 +719,17 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     {
         addAndMakeVisible(comp);
     }
+
+    lowCutBypassButton.setLookAndFeel(&lnf);
+    highCutBypassButton.setLookAndFeel(&lnf);
+
     setSize (800, 400);
 }
 
 CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
 {
+    lowCutBypassButton.setLookAndFeel(nullptr);
+    highCutBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -737,8 +781,8 @@ void CourseworkPluginAudioProcessorEditor::resized()
     driveArea = driveArea.removeFromLeft(driveArea.getWidth() * 0.9);
     auto postGainArea = bounds.removeFromLeft(bounds.getWidth() * 0.9);
 
-    lowCutBypassButton.setBounds(lowCutArea.removeFromTop(25));
-    highCutBypassButton.setBounds(highCutArea.removeFromTop(25));
+    lowCutBypassButton.setBounds(lowCutArea.removeFromTop(35));
+    highCutBypassButton.setBounds(highCutArea.removeFromTop(35));
 
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.8));
     highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.8));
