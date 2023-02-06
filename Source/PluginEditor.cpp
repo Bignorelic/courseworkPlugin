@@ -205,6 +205,8 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
     g.setColour(Colour(209u, 224u, 248u));
     g.drawRoundedRectangle(bounds, 10.f, 1.f);
 
+    //if (juce::Slider::SliderStyle ==  )
+
     if (auto* rswl = dynamic_cast<LinearSliderWithLabels*>(&slider))
     {
         auto centre = bounds.getCentre();
@@ -332,6 +334,42 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
     g.drawEllipse(r, 2);
 }
 
+void VerticalLinearSlider::paint(juce::Graphics& g)
+{
+    using namespace juce;
+
+    auto range = getRange();
+
+    auto sliderBounds = getSliderBounds();
+
+    getLookAndFeel().drawLinearSlider(g,
+        sliderBounds.getX(),
+        sliderBounds.getY(),
+        sliderBounds.getWidth(),
+        sliderBounds.getHeight() * .5,
+        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, sliderBounds.getWidth() * 0.25),
+        0.0,
+        sliderBounds.getWidth(),
+        LinearVertical,
+        *this);
+}
+
+juce::Rectangle<int> VerticalLinearSlider::getSliderBounds() const
+{
+    return getLocalBounds();
+}
+
+juce::String VerticalLinearSlider::getDisplayString() const
+{
+    if (auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param))
+        return choiceParam->getCurrentChoiceName();
+
+    juce::String str;
+
+    str << suffix;
+
+    return str;
+}
 
 //===============================================================================//
 //===============================================================================//
@@ -422,7 +460,6 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
         pathProducer.getPath(leftChannelFFTPath);
     }
 }
-
 
 void ResponseCurveComponent::timerCallback()
 {
@@ -702,15 +739,17 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     highCutFreqSlider   (*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
     lowCutFreqSlider    (*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"),
     driveSlider         (*audioProcessor.apvts.getParameter("Drive"), ""),
-    postGainSlider      (*audioProcessor.apvts.getParameter("PostGain"), "dB"),
+    postGainSlider      (*audioProcessor.apvts.getParameter("Post Gain"), "dB"),
+    distortionMix       (*audioProcessor.apvts.getParameter("Mix"), ""),
     lowCutSlopeSelect   (*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
     highCutSlopeSelect  (*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
 
     responseCurveComponent      (audioProcessor),
     lowCutFreqSliderAttachment  (audioProcessor.apvts, "LowCut Freq", lowCutFreqSlider),
     highCutFreqSliderAttachment (audioProcessor.apvts, "HighCut Freq", highCutFreqSlider),
-    driveSliderAttachment       (audioProcessor.apvts,"Drive", driveSlider),
-    postGainSliderAttachment    (audioProcessor.apvts,"PostGain", postGainSlider),
+    driveSliderAttachment       (audioProcessor.apvts, "Drive", driveSlider),
+    postGainSliderAttachment    (audioProcessor.apvts, "Post Gain", postGainSlider),
+    distortionMixAttachment     (audioProcessor.apvts, "Mix", distortionMix),
     lowCutSlopeSelectAttachment (audioProcessor.apvts, "LowCut Slope", lowCutSlopeSelect),
     highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect),
 
@@ -786,9 +825,11 @@ void CourseworkPluginAudioProcessorEditor::resized()
     auto highCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.9);
     highCutArea = highCutArea.removeFromRight(highCutArea.getWidth() * 0.89);
 
-    auto driveArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
+    auto driveArea = bounds.removeFromLeft(bounds.getWidth() * 0.4);
     driveArea = driveArea.removeFromLeft(driveArea.getWidth() * 0.9);
-    auto postGainArea = bounds.removeFromLeft(bounds.getWidth() * 0.9);
+    auto postGainArea = bounds.removeFromLeft(bounds.getWidth() * 0.66);
+    postGainArea = postGainArea.removeFromLeft(bounds.getWidth() * 0.9);
+    auto distortionMixArea = bounds;
 
     lowCutBypassButton.setBounds(lowCutArea.removeFromTop(35));
     highCutBypassButton.setBounds(highCutArea.removeFromTop(35));
@@ -801,12 +842,14 @@ void CourseworkPluginAudioProcessorEditor::resized()
 
     driveSlider.setBounds(driveArea.removeFromRight(driveArea.getWidth() * 0.89));
     postGainSlider.setBounds(postGainArea.removeFromRight(postGainArea.getWidth() * 0.89));
+    distortionMix.setBounds(distortionMixArea);
 
 
     //waveform size specifics
     //juce::Graphics g(background);
     //g.setColour(juce::Colours::white);
 }
+
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
 {
     return
@@ -815,6 +858,7 @@ std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
         &highCutFreqSlider,
         &driveSlider,
         &postGainSlider,
+        &distortionMix,
         &lowCutSlopeSelect,
         &highCutSlopeSelect,
         &responseCurveComponent,

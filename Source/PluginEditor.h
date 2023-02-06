@@ -220,7 +220,10 @@ private:
 
 struct LinearSliderWithLabels : juce::Slider
 {
-    LinearSliderWithLabels(juce::RangedAudioParameter& rap, const juce::String& unitSuffix) : juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox),
+    LinearSliderWithLabels(juce::RangedAudioParameter& rap, 
+        const juce::String& unitSuffix) : 
+        juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, 
+            juce::Slider::TextEntryBoxPosition::NoTextBox),
         param(&rap),
         suffix(unitSuffix)
     {
@@ -228,6 +231,33 @@ struct LinearSliderWithLabels : juce::Slider
     }
 
     ~LinearSliderWithLabels()
+    {
+        setLookAndFeel(nullptr);
+    }
+    void paint(juce::Graphics& g) override;
+    juce::Rectangle<int> getSliderBounds() const;
+    int getTextHeight() const { return 14; }
+    juce::String getDisplayString() const;
+private:
+    LookAndFeel lnf;
+
+    juce::RangedAudioParameter* param;
+    juce::String suffix;
+};
+
+struct VerticalLinearSlider : juce::Slider
+{
+    VerticalLinearSlider(juce::RangedAudioParameter& rap, 
+        const juce::String& unitSuffix) : 
+        juce::Slider(juce::Slider::SliderStyle::LinearVertical, 
+            juce::Slider::TextEntryBoxPosition::NoTextBox),
+        param(&rap),
+        suffix(unitSuffix)
+    {
+        setLookAndFeel(&lnf);
+    }
+
+    ~VerticalLinearSlider()
     {
         setLookAndFeel(nullptr);
     }
@@ -297,8 +327,7 @@ private:
 };
 
 //==============================================================================
-/**
-*/
+
 class CourseworkPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
@@ -323,6 +352,8 @@ private:
     LinearSliderWithLabels lowCutSlopeSelect,
         highCutSlopeSelect;
 
+    VerticalLinearSlider distortionMix;
+
     /*juce::Slider lowCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
     juce::Slider highCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);*/
 
@@ -336,6 +367,7 @@ private:
         highCutFreqSliderAttachment,
         driveSliderAttachment,
         postGainSliderAttachment,
+        distortionMixAttachment,
         lowCutSlopeSelectAttachment,
         highCutSlopeSelectAttachment;
 
