@@ -218,6 +218,8 @@ private:
     juce::String suffix;
 };
 
+double customSkew(double value);
+
 struct LinearSliderWithLabels : juce::Slider
 {
     LinearSliderWithLabels(juce::RangedAudioParameter& rap, 

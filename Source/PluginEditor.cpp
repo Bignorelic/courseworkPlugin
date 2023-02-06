@@ -96,17 +96,30 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     //g.setColour(Colours::yellow);
     //g.drawRect(sliderBoudns);
 
-    getLookAndFeel().drawRotarySlider(g,
-        sliderBoudns.getX(),
-        sliderBoudns.getY(),
-        sliderBoudns.getWidth(),
-        sliderBoudns.getHeight(),
-        //mapFromLog10((float)jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0), 2.f, 10.f),
-        //mapToLog10((float)getValue(), 10.f, 20000.f),
-        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
-        startAng,
-        endAng,
-        *this);
+    if (suffix == "Hz" || suffix == "kHz")
+    {
+        getLookAndFeel().drawRotarySlider(g,
+            sliderBoudns.getX(),
+            sliderBoudns.getY(),
+            sliderBoudns.getWidth(),
+            sliderBoudns.getHeight(),
+            customSkew(jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0)),
+            startAng,
+            endAng,
+            *this);
+    }
+    else
+    {
+        getLookAndFeel().drawRotarySlider(g,
+            sliderBoudns.getX(),
+            sliderBoudns.getY(),
+            sliderBoudns.getWidth(),
+            sliderBoudns.getHeight(),
+            jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
+            startAng,
+            endAng,
+            *this);
+    }
 
     auto labelArea = getLocalBounds().removeFromBottom(25);
     auto paramName = "";
@@ -115,6 +128,13 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     //g.drawFittedText(std::to_string((labelArea.getBottomRight()).getX()), labelArea.toNearestInt(), juce::Justification::centred, 1);
     //g.drawFittedText(std::to_string(labelArea.getY()), labelArea.toNearestInt(), juce::Justification::centred, 1);
     //g.drawFittedText("dick", labelArea.toNearestInt(), juce::Justification::centred, 1);
+}
+
+double customSkew(double value)
+{
+    int index = 1000;
+    double normalisedValue = (log((index - 1) * value + 1) / log(index));
+    return normalisedValue;
 }
 
 juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
