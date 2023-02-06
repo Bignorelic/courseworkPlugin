@@ -225,8 +225,6 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
         Path p;
 
         Rectangle<float> r;
-        //r.setLeft(bounds.getX());
-        //r.setRight(centre.getY());
         r.setSize(6.f, 6.f);
         r.setCentre(bounds.getWidth() * 0.1, centre.getY());
 
@@ -343,17 +341,6 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
 
     auto sliderBounds = getSliderBounds();
 
-    //getLookAndFeel().drawLinearSlider(g,
-    //    sliderBounds.getX(),
-    //    sliderBounds.getY(),
-    //    sliderBounds.getWidth(),
-    //    sliderBounds.getHeight() * .5,
-    //    jmap(getValue(), range.getStart(), range.getEnd(), 0.0, sliderBounds.getWidth() * 0.25),
-    //    0.0,
-    //    sliderBounds.getWidth(),
-    //    LinearVertical,
-    //    *this);
-
     int x = sliderBounds.getX();
     int y = sliderBounds.getY();
     int width = sliderBounds.getWidth();
@@ -366,9 +353,6 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
 
     auto bounds = Rectangle<float>(x, y, width, height);
 
-    //bounds = bounds.withSizeKeepingCentre(20, 120);
-
-
     //surroundng box
     g.setColour(Colour(27u, 19u, 37u));
     g.fillRoundedRectangle(bounds, 2.f);
@@ -376,23 +360,14 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
     g.setColour(Colour(209u, 224u, 248u));
     g.drawRoundedRectangle(bounds, 10.f, 1.f);
 
-    //if (juce::Slider::SliderStyle ==  )
-
     if (auto* rswl = dynamic_cast<VerticalLinearSlider*>(&*this))
     {
         auto centre = bounds.getCentre();
 
         //line within the box
         auto sliderLine = bounds;
-        //sliderLine.setY(sliderLine.getHeight() * 0.5);
-        //sliderLine.setX(sliderLine.getWidth() * 0.1);
-        //sliderLine.setHeight(sliderLine.getHeight() * 0.05);
-        //sliderLine.setWidth(sliderLine.getWidth() * 0.8);
 
         sliderLine = sliderLine.withSizeKeepingCentre(sliderLine.getWidth() * 0.05, sliderLine.getHeight() * 0.8);
-
-        //g.setColour(Colours::red);
-        //g.drawRect(sliderLine);
 
         g.setColour(Colour(106u, 116u, 133u));
         g.drawRoundedRectangle(sliderLine, 2.f, 1.f);
@@ -401,36 +376,16 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
         Path p;
 
         Rectangle<float> r;
-        //r.setLeft(bounds.getX());
-        //r.setRight(centre.getY());
         r.setSize(20.f, 4.f);
         r.setCentre(bounds.getCentreX(), sliderLine.getCentreY() + sliderLine.getHeight() * 0.4);
 
         p.addRoundedRectangle(r, 1.f);
 
         jassert(minSliderPos < maxSliderPos);
-
-        //auto sliderPosition = jmap(sliderPos, minSliderPos, maxSliderPos, 0.f, height);
-
         p.applyTransform(AffineTransform().translated(0.f, 10.f + sliderPos * -7.8));
 
         g.setColour(Colour(209u, 224u, 248u));
         g.fillPath(p);
-
-        /*g.setFont(rswl->getTextHeight());
-        auto text = rswl->getDisplayString();
-        auto strWidth = g.getCurrentFont().getStringWidth(text);
-
-        r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
-        r.setCentre(bounds.getWidth() * 0.5, bounds.getY() + 30);
-
-        g.drawRect(r);
-
-        g.setColour(Colours::black);
-        g.fillRect(r);
-
-        g.setColour(Colours::white);
-        g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);*/
     }
 }
 
@@ -512,7 +467,6 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
     }
 
     const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
-    //const auto fftSize = 44000;
 
     const auto binWidth = sampleRate / (double)fftSize;
 

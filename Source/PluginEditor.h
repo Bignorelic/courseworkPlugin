@@ -347,16 +347,12 @@ private:
     RotarySliderWithLabels lowCutFreqSlider,
         highCutFreqSlider,
         driveSlider,
-        postGainSlider/*,
-        distortionMix*/;
+        postGainSlider;
 
     LinearSliderWithLabels lowCutSlopeSelect,
         highCutSlopeSelect;
 
     VerticalLinearSlider distortionMix;
-
-    /*juce::Slider lowCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);
-    juce::Slider highCutSlopeSelect = juce::Slider(juce::Slider::SliderStyle::LinearHorizontal, juce::Slider::TextEntryBoxPosition::NoTextBox);*/
 
     ResponseCurveComponent responseCurveComponent;
 
