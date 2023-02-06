@@ -347,7 +347,8 @@ private:
     RotarySliderWithLabels lowCutFreqSlider,
         highCutFreqSlider,
         driveSlider,
-        postGainSlider;
+        postGainSlider/*,
+        distortionMix*/;
 
     LinearSliderWithLabels lowCutSlopeSelect,
         highCutSlopeSelect;
