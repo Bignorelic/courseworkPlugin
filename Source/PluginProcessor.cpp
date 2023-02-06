@@ -37,8 +37,8 @@ CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
 {
     //settings for the waveform visualiser
     waveformViewer.setRepaintRate(60);
-    waveformViewer.setBufferSize(1024);
-    waveformViewer.setSamplesPerBlock(16);
+    waveformViewer.setBufferSize(512);
+    waveformViewer.setSamplesPerBlock(8);
 }
 
 CourseworkPluginAudioProcessor::~CourseworkPluginAudioProcessor()
@@ -239,6 +239,28 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     leftChain.process(leftContext);
     rightChain.process(rightContext);
 
+    float drive = *apvts.getRawParameterValue("Drive");
+    float postGain = *apvts.getRawParameterValue("Post Gain");
+    float mix = *apvts.getRawParameterValue("Mix");
+
+    float gainFactor = pow(10, postGain / 20);
+
+    for (int channel = 0; channel < totalNumInputChannels; channel++)
+    {
+        float* channelData = buffer.getWritePointer(channel);
+        
+        for (int sample = 0; sample < buffer.getNumSamples(); sample++)
+        {
+            float drySignal = *channelData;
+
+            *channelData *= drive * 0.5;
+            //*channelData = tanh(*channelData);
+            *channelData = ((tanh(*channelData) * mix + drySignal * (1 - mix))) * gainFactor;
+
+            channelData++;
+        }
+    }
+
 
     //waveform viewer
     waveformViewer.pushBuffer(buffer);
@@ -301,7 +323,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
     return settings;
 }
 
-void /*CourseworkPluginAudioProcessor::*/updateCoefficients(Coefficients& old, const Coefficients& replacements)
+void updateCoefficients(Coefficients& old, const Coefficients& replacements)
 {
     *old = *replacements;
 }
@@ -330,9 +352,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
 
     //parameters for distortion
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Drive", "Drive", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Drive", "Drive", juce::NormalisableRange<float>(1.f, 100.f, 0.01f, 1.f), 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Post Gain", "Post Gain", juce::NormalisableRange<float>(-12.f, 0.f, 0.01f, 1.f), 0.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Mix", "Mix", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Mix", "Mix", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 1.f));
 
     layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));

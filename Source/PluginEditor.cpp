@@ -795,8 +795,8 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     // editor's size to whatever you need it to be.
 
     addAndMakeVisible(audioProcessor.waveformViewer);
-    //audioProcessor.waveformViewer.setColours(juce::Colour(0.f, 0.f, 0.f, 0.f), juce::Colours::white);
     audioProcessor.waveformViewer.setColours(juce::Colours::black, juce::Colours::white);
+    //audioProcessor.waveformViewer.setColours(juce::Colour(10.f, 10.f, 10.f, 0.f), juce::Colours::white);
 
     for (auto* comp : getComps())
     {
