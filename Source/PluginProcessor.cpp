@@ -225,10 +225,10 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     juce::dsp::AudioBlock<float> block(buffer);
 
-    buffer.clear();
-    
-    juce::dsp::ProcessContextReplacing<float> stereoContext(block);
-    osc.process(stereoContext);
+    //buffer.clear();
+    //
+    //juce::dsp::ProcessContextReplacing<float> stereoContext(block);
+    //osc.process(stereoContext);
 
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
@@ -243,7 +243,6 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     float postGain = *apvts.getRawParameterValue("Post Gain");
     float mix = *apvts.getRawParameterValue("Mix");
 
-
     for (int channel = 0; channel < totalNumInputChannels; channel++)
     {
         float* channelData = buffer.getWritePointer(channel);
@@ -254,6 +253,9 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
             *channelData *= drive;
             *channelData = ((tanh(*channelData) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
+            //*channelData = ((sin(*channelData) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
+            //*channelData = ((pow(sin(*channelData), 3) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
+            //*channelData = ( ( 0.625 * tan(sin(*channelData)) * mix + drySignal * (1 - mix) ) ) * gainToAmplifier(postGain);
 
             channelData++;
         }
