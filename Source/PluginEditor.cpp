@@ -835,12 +835,12 @@ CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
 }
 
 //==============================================================================
-void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
+void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
 {
     using namespace juce;
-   
+
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::black);
+    g.fillAll(Colours::black);
 
     auto bounds = getLocalBounds();
 
@@ -850,11 +850,56 @@ void CourseworkPluginAudioProcessorEditor::paint (juce::Graphics& g)
     audioProcessor.waveformViewer.setBounds(waveformArea.withSizeKeepingCentre(298, 100));
     auto waveformBounds = waveformArea.withSizeKeepingCentre(300, 120);
 
+    auto filterArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
+    auto lowCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.5);
+    lowCutArea = lowCutArea.removeFromLeft(lowCutArea.getWidth() * 0.9);
+    lowCutArea = lowCutArea.removeFromRight(lowCutArea.getWidth() * 0.89);
+    auto highCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.9);
+    highCutArea = highCutArea.removeFromRight(highCutArea.getWidth() * 0.89);
+
+    bounds.removeFromRight(20);
+
+    auto driveArea = bounds.removeFromLeft(165);
+    auto distortionMixArea = bounds.removeFromLeft(50);
+    distortionMixArea = distortionMixArea.withSizeKeepingCentre(20, 140);
+    auto postGainArea = bounds;
+
+    //g.setColour(Colours::red);
+    //g.drawRect(lowCutArea);
+    //g.drawRect(highCutArea);
+    //g.drawRect(distortionMixArea);
+    //g.drawRect(driveArea);
+    //g.drawRect(postGainArea);
+
+    g.setColour(Colours::white);
+
+    labelWriter(g, lowCutArea, "Low Cut", 0);
+    labelWriter(g, highCutArea, "High Cut", 0);
+    labelWriter(g, driveArea, "Drive", 1);
+    labelWriter(g, distortionMixArea, "Drive Mix", 2);
+    labelWriter(g, postGainArea, "Post Gain", 1);
+
     g.setColour(Colours::lavender);
     g.drawRoundedRectangle(waveformBounds.toFloat(), 4.f, 1.f);
     g.setColour(Colours::grey);
     g.drawHorizontalLine(24, waveformArea.getX(), waveformArea.getRight());
     g.drawHorizontalLine(waveformArea.getHeight() - 24, waveformArea.getX(), waveformArea.getRight());
+}
+void labelWriter(juce::Graphics&g, juce::Rectangle<int> area, juce::String text, int choice)
+{
+    auto textArea = area.withSizeKeepingCentre(100, 50);
+    int offset;
+
+    if (choice == 0)
+        offset = 65;
+    else if (choice == 1)
+        offset = 75;
+    else
+        offset = 85;
+
+    textArea.setCentre(area.getCentreX(), area.getCentreY() + offset);
+
+    g.drawFittedText(text, textArea, juce::Justification::centred, 1);
 }
 
 void CourseworkPluginAudioProcessorEditor::resized()
@@ -880,9 +925,10 @@ void CourseworkPluginAudioProcessorEditor::resized()
     highCutArea = highCutArea.removeFromRight(highCutArea.getWidth() * 0.89);
 
     bounds.removeFromRight(20);
-    auto distortionMixArea = bounds.removeFromRight(40);
+
+    auto driveArea = bounds.removeFromLeft(165);
+    auto distortionMixArea = bounds.removeFromLeft(50);
     distortionMixArea = distortionMixArea.withSizeKeepingCentre(20, 140);
-    auto driveArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
     auto postGainArea = bounds;
 
     lowCutBypassButton.setBounds(lowCutArea.removeFromTop(35));
@@ -894,8 +940,8 @@ void CourseworkPluginAudioProcessorEditor::resized()
     lowCutSlopeSelect.setBounds(lowCutArea);
     highCutSlopeSelect.setBounds(highCutArea);
 
-    driveSlider.setBounds(driveArea.removeFromRight(driveArea.getWidth() * 0.89));
-    postGainSlider.setBounds(postGainArea.removeFromRight(postGainArea.getWidth() * 0.89));
+    driveSlider.setBounds(driveArea.withSizeKeepingCentre(150, 230));
+    postGainSlider.setBounds(postGainArea.withSizeKeepingCentre(150, 230));
     distortionMix.setBounds(distortionMixArea);
 
 

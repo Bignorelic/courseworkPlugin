@@ -382,3 +382,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CourseworkPluginAudioProcessorEditor)
 };
+
+void labelWriter(juce::Graphics& g, juce::Rectangle<int> area, juce::String text, int choice);
