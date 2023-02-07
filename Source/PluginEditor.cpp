@@ -96,6 +96,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     //g.setColour(Colours::yellow);
     //g.drawRect(sliderBoudns);
 
+    //only call the custom skew function for the frequency sliders
     if (suffix == "Hz" || suffix == "kHz")
     {
         getLookAndFeel().drawRotarySlider(g,
@@ -131,6 +132,8 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
 
 double customSkew(double value)
 {
+    //index determines the amount of skew that occurs
+    //I found 1000 to be a nice number
     int index = 1000;
     double normalisedValue = (log((index - 1) * value + 1) / log(index));
     return normalisedValue;
