@@ -225,10 +225,10 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     juce::dsp::AudioBlock<float> block(buffer);
 
-    //buffer.clear();
-    //
-    //juce::dsp::ProcessContextReplacing<float> stereoContext(block);
-    //osc.process(stereoContext);
+    buffer.clear();
+    
+    juce::dsp::ProcessContextReplacing<float> stereoContext(block);
+    osc.process(stereoContext);
 
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
@@ -243,7 +243,6 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     float postGain = *apvts.getRawParameterValue("Post Gain");
     float mix = *apvts.getRawParameterValue("Mix");
 
-    float gainFactor = pow(10, postGain / 20);
 
     for (int channel = 0; channel < totalNumInputChannels; channel++)
     {
@@ -253,9 +252,8 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         {
             float drySignal = *channelData;
 
-            *channelData *= drive * 0.5;
-            //*channelData = tanh(*channelData);
-            *channelData = ((tanh(*channelData) * mix + drySignal * (1 - mix))) * gainFactor;
+            *channelData *= drive;
+            *channelData = ((tanh(*channelData) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
 
             channelData++;
         }
@@ -267,6 +265,11 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     leftChannelFifo.update(buffer);
     rightChannelFifo.update(buffer);
+}
+
+float gainToAmplifier(float gain)
+{
+    return pow(10, gain / 20);
 }
 
 //==============================================================================
@@ -352,7 +355,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
 
     //parameters for distortion
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Drive", "Drive", juce::NormalisableRange<float>(1.f, 100.f, 0.01f, 1.f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Drive", "Drive", juce::NormalisableRange<float>(1.f, 10.f, 0.01f, 1.f), 1.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Post Gain", "Post Gain", juce::NormalisableRange<float>(-12.f, 0.f, 0.01f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Mix", "Mix", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 1.f));
 

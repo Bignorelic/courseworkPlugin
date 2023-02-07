@@ -122,8 +122,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     }
 
     auto labelArea = getLocalBounds().removeFromBottom(25);
-    auto paramName = "";
-    
+    auto paramName = "";  
 
     //g.drawFittedText(std::to_string((labelArea.getBottomRight()).getX()), labelArea.toNearestInt(), juce::Justification::centred, 1);
     //g.drawFittedText(std::to_string(labelArea.getY()), labelArea.toNearestInt(), juce::Justification::centred, 1);
