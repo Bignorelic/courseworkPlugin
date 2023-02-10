@@ -21,8 +21,7 @@
 //===============================================================================//
 
 
-//drawing the circular sliders
-
+//draws the circular sliders
 void LookAndFeel::drawRotarySlider(juce::Graphics& g,
     int x,
     int y,
@@ -35,11 +34,14 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g,
 {
     using namespace juce;
 
+    //create bounds for the slider area
     auto bounds = Rectangle<float>(x, y, width, height);
 
+    //fill circle with the bounds
     g.setColour(Colour(27u, 19u, 37u));
     g.fillEllipse(bounds);
 
+    //outline the circle
     g.setColour(Colour(209u, 224u, 248u));
     g.drawEllipse(bounds, 1.f);
 
@@ -49,32 +51,41 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g,
 
         Path p;
 
+        //sets bounds for the line tat indicates position of slider
         Rectangle<float> r;
         r.setLeft(centre.getX() - 2);
         r.setRight(centre.getX() + 2);
         r.setTop(bounds.getY());
         r.setBottom(centre.getY() - rswl->getTextHeight() * 1.5);
 
+        //sets a rounded rectangle with those bounds as a path
         p.addRoundedRectangle(r, 2.f);
 
+        //raises an expection if the start angle is greater than the end angle
         jassert(rotaryStartAngle < rotaryEndAngle);
 
         auto sliderAngRad = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
 
+        //transforms the rounded rectangle with to the value of the parameter
         p.applyTransform(AffineTransform().rotated(sliderAngRad, centre.getX(), centre.getY()));
 
+        //draws the path
         g.fillPath(p);
 
+        //gets parameter value as text
         g.setFont(rswl->getTextHeight());
         auto text = rswl->getDisplayString();
         auto strWidth = g.getCurrentFont().getStringWidth(text);
 
+        //sets bounds for the text box
         r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
         r.setCentre(bounds.getCentre());
 
+        //draws text box
         g.setColour(Colours::black);
         g.fillRect(r);
 
+        //draws the text
         g.setColour(Colours::white);
         g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
     }
@@ -86,9 +97,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
 
     auto startAng = degreesToRadians(180.f + 45.f);
     auto endAng = degreesToRadians(180.f - 45.f) + MathConstants<float>::twoPi;
-
     auto range = getRange();
-
     auto sliderBoudns = getSliderBounds();
 
     //g.setColour(Colours::red);
@@ -121,19 +130,12 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
             endAng,
             *this);
     }
-
-    auto labelArea = getLocalBounds().removeFromBottom(25);
-    auto paramName = "";  
-
-    //g.drawFittedText(std::to_string((labelArea.getBottomRight()).getX()), labelArea.toNearestInt(), juce::Justification::centred, 1);
-    //g.drawFittedText(std::to_string(labelArea.getY()), labelArea.toNearestInt(), juce::Justification::centred, 1);
-    //g.drawFittedText("dick", labelArea.toNearestInt(), juce::Justification::centred, 1);
 }
 
 double customSkew(double value)
 {
     //index determines the amount of skew that occurs
-    //I found 1000 to be a nice number
+    //i found 1000 to be a nice number
     int index = 1000;
     double normalisedValue = (log((index - 1) * value + 1) / log(index));
     return normalisedValue;
@@ -141,8 +143,6 @@ double customSkew(double value)
 
 juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
 {
-    //return getLocalBounds();
-
     auto bounds = getLocalBounds();
 
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
@@ -151,12 +151,15 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     juce::Rectangle<int> r;
     r.setSize(size, size);
 
+    //sets centres for the sliders
     if (suffix == "" || suffix =="dB")
     {
+        //centre stays at centre for distortion sliders
         r.setCentre(bounds.getCentreX(), bounds.getCentreY());
     }
     else
     {
+        //centre is lower for the frequency sliders
         r.setCentre(bounds.getCentreX(), 0);
         r.setY(20);
     }
@@ -166,8 +169,6 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
 
 juce::String RotarySliderWithLabels::getDisplayString() const
 {
-    //return juce::String(getValue());
-
     if (auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param))
         return choiceParam->getCurrentChoiceName();
 
@@ -176,14 +177,22 @@ juce::String RotarySliderWithLabels::getDisplayString() const
 
     if (auto* floatParam = dynamic_cast<juce::AudioParameterFloat*>(param))
     {
+        //gets value of parameter
         float val = getValue();
 
+        //if the value is bigger than 1000
+        //  add k to the suffix
         if (val > 999.f)
         {
             val /= 1000.f;
             addK = true;
         }
 
+        //convert value to string
+        //if addK is true
+        //  have two decimal places
+        //if not
+        //  no decimals
         str = juce::String(val, (addK ? 2 : 0));
     }
     else
@@ -194,9 +203,12 @@ juce::String RotarySliderWithLabels::getDisplayString() const
     if (suffix.isNotEmpty())
     {
         str << " ";
+        
+        //add k to the string if addK is true
         if (addK)
             str << "k";
 
+        //add the suffix to the string
         str << suffix;
     }
 
@@ -205,6 +217,7 @@ juce::String RotarySliderWithLabels::getDisplayString() const
 
 //===============================================================================//
 
+//draws the horizontal linear sliders
 void LookAndFeel::drawLinearSlider(juce::Graphics& g,
     int x, 
     int y, 
@@ -220,58 +233,64 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
 
     auto bounds = Rectangle<float>(x, y, width, height);
 
-    //surroundng box
+    //draw box
     g.setColour(Colour(27u, 19u, 37u));
     g.fillRoundedRectangle(bounds, 2.f);
 
+    //draw outline of box
     g.setColour(Colour(209u, 224u, 248u));
     g.drawRoundedRectangle(bounds, 10.f, 1.f);
-
-    //if (juce::Slider::SliderStyle ==  )
 
     if (auto* rswl = dynamic_cast<LinearSliderWithLabels*>(&slider))
     {
         auto centre = bounds.getCentre();
 
-        //line within the box
+        //line within the box for the path that the dot takes
         auto sliderLine = bounds;
         sliderLine.setY(sliderLine.getHeight() * 0.5);
         sliderLine.setX(sliderLine.getWidth() * 0.1);
         sliderLine.setHeight(sliderLine.getHeight() * 0.05);
         sliderLine.setWidth(sliderLine.getWidth() * 0.8);
 
+        //draw line
         g.setColour(Colour(106u, 116u, 133u));
         g.drawRoundedRectangle(sliderLine, 2.f, 1.f);
 
         //dot
         Path p;
 
+        //bounds for the dot
         Rectangle<float> r;
         r.setSize(6.f, 6.f);
         r.setCentre(bounds.getWidth() * 0.1, centre.getY());
 
-
+        //add circle with those bounds as a path
         p.addEllipse(r);
 
         jassert(minSliderPos < maxSliderPos);
 
         auto sliderPosition = jmap(sliderPos, 0.f, 1.f, minSliderPos, maxSliderPos);
 
+        //move dot with the parameter value
         p.applyTransform(AffineTransform().translated(sliderPos * 3.2, 0.f));
 
+        //set colour and draw dot
         g.setColour(Colour(209u, 224u, 248u));
         g.fillPath(p);
 
+        //gets parameter value as text
         g.setFont(rswl->getTextHeight());
         auto text = rswl->getDisplayString();
         auto strWidth = g.getCurrentFont().getStringWidth(text);
 
+        //creates text box bounds and draws
         r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
         r.setCentre(bounds.getWidth() * 0.5, bounds.getY() + 30);
 
         g.setColour(Colours::black);
         g.fillRect(r);
 
+        //draw text
         g.setColour(Colours::white);
         g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
     }
@@ -309,6 +328,7 @@ juce::String LinearSliderWithLabels::getDisplayString() const
 
     juce::String str;
 
+    //add suffix to string
     str << suffix;
 
     return str;
@@ -316,6 +336,7 @@ juce::String LinearSliderWithLabels::getDisplayString() const
 
 //===============================================================================//
 
+//draws the toggle boxes
 void LookAndFeel::drawToggleButton(juce::Graphics& g,
     juce::ToggleButton& toggleButton,
     bool shouldDrawBurronAsHighlighted,
@@ -325,14 +346,16 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
     
     Path powerButton;
 
+    //set bounds
     auto bounds = toggleButton.getLocalBounds();
     auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 12;
     auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
-    r.setCentre(r.getCentreX(), r.getCentreY()+5);
+    r.setCentre(r.getCentreX(), r.getCentreY() + 5);
 
     float ang = 30.f;
     size -= 10;
 
+    //adds an arc to the path
     powerButton.addCentredArc(r.getCentreX(), 
         r.getCentreY(), 
         size * 0.5, 
@@ -342,27 +365,31 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
         degreesToRadians(360.f - ang), 
         true);
 
+    //add a vertical line to the path
     powerButton.startNewSubPath(r.getCentreX(), r.getY());
     powerButton.lineTo(r.getCentre());
     
     PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
     
+    //change colour for each state of the toggle button
     auto colour = toggleButton.getToggleState() ? Colours::dimgrey : Colours::aliceblue;
 
+    //set colour, draw path and draw circle around it
     g.setColour(colour);
     g.strokePath(powerButton, pst);
     g.drawEllipse(r, 2);
 }
 
+//===============================================================================//
 
+//draws vertical linear sliders
 void VerticalLinearSlider::paint(juce::Graphics& g)
 {
     using namespace juce;
 
+    //get values to use
     auto range = getRange();
-
     auto sliderBounds = getSliderBounds();
-
     int x = sliderBounds.getX();
     int y = sliderBounds.getY();
     int width = sliderBounds.getWidth();
@@ -371,14 +398,13 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
     float minSliderPos = 0.0;
     float maxSliderPos = 1.0;
 
-    using namespace juce;
-
     auto bounds = Rectangle<float>(x, y, width, height);
 
-    //surroundng box
+    //draw surrounding box
     g.setColour(Colour(27u, 19u, 37u));
     g.fillRoundedRectangle(bounds, 2.f);
 
+    //draw outline
     g.setColour(Colour(209u, 224u, 248u));
     g.drawRoundedRectangle(bounds, 10.f, 1.f);
 
@@ -388,24 +414,29 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
 
         //line within the box
         auto sliderLine = bounds;
-
         sliderLine = sliderLine.withSizeKeepingCentre(sliderLine.getWidth() * 0.05, sliderLine.getHeight() * 0.8);
 
+        //set colour and draw line
         g.setColour(Colour(106u, 116u, 133u));
         g.drawRoundedRectangle(sliderLine, 2.f, 1.f);
 
-        //dot
+        //dash showing position of value
         Path p;
 
+        //set bounds for dash
         Rectangle<float> r;
         r.setSize(20.f, 4.f);
         r.setCentre(bounds.getCentreX(), sliderLine.getCentreY() + sliderLine.getHeight() * 0.4);
 
+        //draw dash
         p.addRoundedRectangle(r, 1.f);
 
         jassert(minSliderPos < maxSliderPos);
+
+        //let the dash follow value of the parameter 
         p.applyTransform(AffineTransform().translated(0.f, 10.f + sliderPos * -7.8));
 
+        //set colour and draw
         g.setColour(Colour(209u, 224u, 248u));
         g.fillPath(p);
     }
@@ -416,25 +447,12 @@ juce::Rectangle<int> VerticalLinearSlider::getSliderBounds() const
     return getLocalBounds();
 }
 
-juce::String VerticalLinearSlider::getDisplayString() const
-{
-    if (auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param))
-        return choiceParam->getCurrentChoiceName();
-
-    juce::String str;
-
-    str << suffix;
-
-    return str;
-}
-
-
 //===============================================================================//
 //===============================================================================//
 
+//response curve
 ResponseCurveComponent::ResponseCurveComponent(CourseworkPluginAudioProcessor& p) : 
     audioProcessor(p),
-//    leftChannelFifo(&audioProcessor.leftChannelFifo)
 leftPathProducer(audioProcessor.leftChannelFifo),
 rightPathProducer(audioProcessor.rightChannelFifo)
 {
@@ -444,9 +462,8 @@ rightPathProducer(audioProcessor.rightChannelFifo)
         param->addListener(this);
     }
 
-
+    //update curve
     updateChain();
-
     startTimerHz(60);
 }
 
@@ -464,6 +481,7 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
     parametersChanged.set(true);
 }
 
+//produces path for FFT
 void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 {
     juce::AudioBuffer<float> tempIncomingBuffer;
@@ -520,22 +538,23 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void ResponseCurveComponent::timerCallback()
 {
+    //get values
     auto fftBounds = getAnalysisArea().toFloat();
     auto sampleRate = audioProcessor.getSampleRate();
 
+    //produce path for eachh stereo channel
     leftPathProducer.process(fftBounds, sampleRate);
     rightPathProducer.process(fftBounds, sampleRate);
 
-
-
+    //if parameters change
+    //  update the curve
     if (parametersChanged.compareAndSetBool(false, true))
     {
         //update the monochain
         updateChain();
-        //repaint
-        //repaint();
     }
 
+    //constantly repaint
     repaint();
 }
 
@@ -543,6 +562,7 @@ void ResponseCurveComponent::updateChain()
 {
     auto chainSettings = getChainSettings(audioProcessor.apvts);
 
+    //update the filters based on parameters
     monoChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
     monoChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
 
@@ -557,7 +577,6 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 {
     using namespace juce;
 
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(Colours::black);
 
     g.drawImage(background, getLocalBounds().toFloat());
@@ -581,11 +600,13 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 
     mags.resize(spectrumW);
 
+    //each pixel along the width of the spectrum area
     for (int i = 0; i < spectrumW; ++i)
     {
         double mag = 1.f;
-        auto freq = mapToLog10(double(i) / double(spectrumW), 20.0, 20000.0);
+        auto freq = mapToLog10(double(i) / double(spectrumW), 10.0, 20000.0);
 
+        //change gain of frquqncy at that point depending on if the filters are on
         if (!monoChain.isBypassed<ChainPositions::LowCut>())
         {
             if (!lowcut.isBypassed<0>())
@@ -612,8 +633,10 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         mags[i] = Decibels::gainToDecibels(mag);
     }
 
+    //set the curve as a path
     Path responseCurve;
 
+    //map the gain of frequency to height of path
     const double outputMin = spectrumArea.getBottom();
     const double outputMax = spectrumArea.getY();
     auto map = [outputMin, outputMax](double input)
@@ -628,14 +651,14 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         responseCurve.lineTo(spectrumArea.getX() + i, map(mags[i]));
     };
 
-    //generate and paint left channel path
+    //generate and paint left channel FFT path
     auto leftChannelFFTPath = leftPathProducer.getPath();
     leftChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
 
     g.setColour(Colours::slateblue);
     g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
 
-    //generate and paint right channel path
+    //generate and paint right channel FFT path
     auto rightChannelFFTPath = rightPathProducer.getPath();
     rightChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
 
@@ -670,7 +693,7 @@ void ResponseCurveComponent::resized()
         2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000
     };
 
-    //getting values for the bouneding area so its quick to use
+    //getting values for the bounding area so its quick to use
     auto renderArea = getAnalysisArea();
     auto left = renderArea.getX();
     auto right = renderArea.getRight();
@@ -690,7 +713,7 @@ void ResponseCurveComponent::resized()
     //horizontal lines for gain
     Array<float> gain
     {
-        -24,-12,0,12,24
+        -24, -12, 0, 12, 24
     };
 
     for (auto gdB : gain)
@@ -700,7 +723,7 @@ void ResponseCurveComponent::resized()
         g.drawHorizontalLine(y, left, right);
     }
 
-    //vertical lines for frequency
+    //vertical lines for main frequencies
     Array<float> xs;
     for (auto f : mainFreqs)
     {
@@ -730,6 +753,7 @@ void ResponseCurveComponent::resized()
         auto f = mainFreqs[i];
         auto x = xs[i];
 
+        //same addK code as the rotary sliders
         bool addK = false;
         String str;
         if (f > 999.f)
@@ -745,11 +769,13 @@ void ResponseCurveComponent::resized()
 
         auto textWidth = g.getCurrentFont().getStringWidth(str);
 
+        //set bounds
         Rectangle<int> r;
         r.setSize(textWidth, fontHeight);
         r.setCentre(x, 0);
         r.setY(1);
 
+        //draw text
         g.drawFittedText(str, r, juce::Justification::centred, 1);
     }
 
@@ -789,7 +815,9 @@ juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea()
     return bounds;
 }
 
-//==============================================================================
+//===============================================================================//
+//===============================================================================//
+
 CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
 
@@ -816,10 +844,12 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
+    //add waveform visualiser
     addAndMakeVisible(audioProcessor.waveformViewer);
     audioProcessor.waveformViewer.setColours(juce::Colours::black, juce::Colours::white);
     //audioProcessor.waveformViewer.setColours(juce::Colour(10.f, 10.f, 10.f, 0.f), juce::Colours::white);
 
+    //add each parameter
     for (auto* comp : getComps())
     {
         addAndMakeVisible(comp);
@@ -828,6 +858,7 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     lowCutBypassButton.setLookAndFeel(&lnf);
     highCutBypassButton.setLookAndFeel(&lnf);
 
+    //plugin size
     setSize (800, 400);
 }
 
@@ -837,16 +868,15 @@ CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
     highCutBypassButton.setLookAndFeel(nullptr);
 }
 
-//==============================================================================
 void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
 {
     using namespace juce;
 
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(Colours::black);
 
     auto bounds = getLocalBounds();
 
+    //set bounds for everything
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
     auto waveformArea = visualiserArea;
@@ -874,6 +904,7 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     //g.drawRect(driveArea);
     //g.drawRect(postGainArea);
 
+    //draw labels for all parameters
     g.setColour(Colours::white);
 
     labelWriter(g, lowCutArea, "Low Cut", 0);
@@ -882,26 +913,33 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     labelWriter(g, distortionMixArea, "Drive Mix", 2);
     labelWriter(g, postGainArea, "Post Gain", 1);
 
+    //draw lines for waveform visualiser
     g.setColour(Colours::lavender);
     g.drawRoundedRectangle(waveformBounds.toFloat(), 4.f, 1.f);
     g.setColour(Colours::grey);
     g.drawHorizontalLine(24, waveformArea.getX(), waveformArea.getRight());
     g.drawHorizontalLine(waveformArea.getHeight() - 24, waveformArea.getX(), waveformArea.getRight());
 }
-void labelWriter(juce::Graphics&g, juce::Rectangle<int> area, juce::String text, int choice)
+
+void labelWriter(juce::Graphics&g, //juce graphics
+    juce::Rectangle<int> area, //area
+    juce::String text, //text
+    int yPos) //determines height
 {
     auto textArea = area.withSizeKeepingCentre(100, 50);
     int offset;
 
-    if (choice == 0)
+    if (yPos == 0)
         offset = 65;
-    else if (choice == 1)
+    else if (yPos == 1)
         offset = 75;
     else
         offset = 85;
 
+    //set area size
     textArea.setCentre(area.getCentreX(), area.getCentreY() + offset);
 
+    //draw text
     g.drawFittedText(text, textArea, juce::Justification::centred, 1);
 }
 
@@ -910,7 +948,7 @@ void CourseworkPluginAudioProcessorEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
 
-    //setting bounds for where each parameter will be
+    //making bounds for everything
     auto bounds = getLocalBounds();
 
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
@@ -934,6 +972,7 @@ void CourseworkPluginAudioProcessorEditor::resized()
     distortionMixArea = distortionMixArea.withSizeKeepingCentre(20, 140);
     auto postGainArea = bounds;
 
+    //setting bounds for everything
     lowCutBypassButton.setBounds(lowCutArea.removeFromTop(35));
     highCutBypassButton.setBounds(highCutArea.removeFromTop(35));
 
@@ -946,15 +985,11 @@ void CourseworkPluginAudioProcessorEditor::resized()
     driveSlider.setBounds(driveArea.withSizeKeepingCentre(150, 230));
     postGainSlider.setBounds(postGainArea.withSizeKeepingCentre(150, 230));
     distortionMix.setBounds(distortionMixArea);
-
-
-    //waveform size specifics
-    //juce::Graphics g(background);
-    //g.setColour(juce::Colours::white);
 }
 
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
 {
+    //returns each parameter to make visible
     return
     {
         &lowCutFreqSlider,

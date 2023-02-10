@@ -11,18 +11,20 @@
 
 //==============================================================================
 
-class Visualiser : public juce::AudioVisualiserComponent
-{
-public:
-    Visualiser() : AudioVisualiserComponent(1)
-    {
-        setBufferSize(64);
-        setSamplesPerBlock(256);
-    }
-};
+//class Visualiser : public juce::AudioVisualiserComponent
+//{
+//public:
+//    Visualiser() : AudioVisualiserComponent(1)
+//    {
+//        //settings for waveform visualiser
+//        setBufferSize(64);
+//        setSamplesPerBlock(256);
+//    }
+//};
 
 //==============================================================================
 //==============================================================================
+
 CourseworkPluginAudioProcessor::CourseworkPluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -111,7 +113,7 @@ void CourseworkPluginAudioProcessor::updateLowCutFilters(const ChainSettings& ch
 {
     auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
 
-    //low cut filter in the left channel
+    //low cut filter in both channels
     auto& leftLowCut = leftChain.get <ChainPositions::LowCut>();
     auto& rightLowCut = rightChain.get <ChainPositions::LowCut>();
 
@@ -141,6 +143,7 @@ void CourseworkPluginAudioProcessor::updateFilters()
 {
     auto chainSettings = getChainSettings(apvts);
 
+    //update both filters
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
 }
@@ -154,9 +157,7 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
     juce::dsp::ProcessSpec spec;
 
     spec.maximumBlockSize = samplesPerBlock;
-
     spec.numChannels = 1;
-
     spec.sampleRate = sampleRate;
 
     leftChain.prepare(spec);
@@ -167,6 +168,7 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
     leftChannelFifo.prepare(samplesPerBlock);
     rightChannelFifo.prepare(samplesPerBlock);
 
+    //sine oscillator tester
     osc.initialise([](float x) { return std::sin(x); });
 
     spec.numChannels = getTotalNumOutputChannels();
@@ -221,10 +223,12 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    //update filters
     updateFilters();
 
     juce::dsp::AudioBlock<float> block(buffer);
 
+    //sine oscillator
     //buffer.clear();
     //
     //juce::dsp::ProcessContextReplacing<float> stereoContext(block);
@@ -239,20 +243,30 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     leftChain.process(leftContext);
     rightChain.process(rightContext);
 
+    //get distortion parameters
     float drive = *apvts.getRawParameterValue("Drive");
     float postGain = *apvts.getRawParameterValue("Post Gain");
     float mix = *apvts.getRawParameterValue("Mix");
 
+    //distortion logic
     for (int channel = 0; channel < totalNumInputChannels; channel++)
     {
         float* channelData = buffer.getWritePointer(channel);
         
         for (int sample = 0; sample < buffer.getNumSamples(); sample++)
         {
+            //save original signal
             float drySignal = *channelData;
 
+            //raise volume
             *channelData *= drive;
+
+            //clip audio with tanh function
+            //mix with original signal
+            //multiply by gain
             *channelData = ((tanh(*channelData) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
+
+            //other distortion algorithms
             //*channelData = ((sin(*channelData) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
             //*channelData = ((pow(sin(*channelData), 3) * mix + drySignal * (1 - mix))) * gainToAmplifier(postGain);
             //*channelData = ( ( 0.625 * tan(sin(*channelData)) * mix + drySignal * (1 - mix) ) ) * gainToAmplifier(postGain);
@@ -261,16 +275,17 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         }
     }
 
-
     //waveform viewer
     waveformViewer.pushBuffer(buffer);
 
+    //update FFT spectrum analyser
     leftChannelFifo.update(buffer);
     rightChannelFifo.update(buffer);
 }
 
 float gainToAmplifier(float gain)
 {
+    //converts gain in dB to multiplier
     return pow(10, gain / 20);
 }
 
@@ -317,6 +332,7 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
 {
     ChainSettings settings;
 
+    //get parameter values
     settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
     settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
     settings.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
@@ -361,6 +377,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     layout.add(std::make_unique<juce::AudioParameterFloat>("Post Gain", "Post Gain", juce::NormalisableRange<float>(-12.f, 0.f, 0.01f, 1.f), 0.f));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Mix", "Mix", juce::NormalisableRange<float>(0.f, 1.f, 0.01f, 1.f), 1.f));
 
+    //toggle box for bypass buttons
     layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
 

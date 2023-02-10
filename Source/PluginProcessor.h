@@ -192,11 +192,14 @@ void update(ChainType& chain, const CoefficientType& coefficients)
 template<typename ChainType, typename CoefficientType>
 void updateFilter(ChainType& chain, const CoefficientType& coefficients, const Slope& slope)
 {
+    //a 12 dB/Oct is applied a number of times depending on the slope
     chain.template setBypassed<0>(true);
     chain.template setBypassed<1>(true);
     chain.template setBypassed<2>(true);
     chain.template setBypassed<3>(true);
 
+    //switch case doesnt break for each case so,
+    //for Slope_48, four filters are unbypassed
     switch (slope)
     {
         case Slope_48:
@@ -229,8 +232,7 @@ inline auto makeHighCutFilter(const ChainSettings& chainSettings, double sampleR
 }
 
 //==============================================================================
-/**
-*/
+
 class CourseworkPluginAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
