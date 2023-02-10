@@ -858,14 +858,27 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     lowCutBypassButton.setLookAndFeel(&lnf);
     highCutBypassButton.setLookAndFeel(&lnf);
 
+    addAndMakeVisible(verticalMeterL);
+    addAndMakeVisible(verticalMeterR);
+
     //plugin size
     setSize (800, 400);
+
+    startTimerHz(60);
 }
 
 CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
 {
     lowCutBypassButton.setLookAndFeel(nullptr);
     highCutBypassButton.setLookAndFeel(nullptr);
+}
+
+void CourseworkPluginAudioProcessorEditor::timerCallback()
+{
+    verticalMeterL.setLevel(audioProcessor.getRmsValue(0));
+    verticalMeterR.setLevel(audioProcessor.getRmsValue(1));
+    verticalMeterL.repaint();
+    verticalMeterR.repaint();
 }
 
 void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
@@ -878,10 +891,11 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
 
     //set bounds for everything
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
-    auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
-    auto waveformArea = visualiserArea;
-    audioProcessor.waveformViewer.setBounds(waveformArea.withSizeKeepingCentre(298, 100));
-    auto waveformBounds = waveformArea.withSizeKeepingCentre(300, 120);
+    auto spectrumArea = visualiserArea.removeFromLeft(485);
+    auto waveformArea = visualiserArea.removeFromRight(285);
+    auto meterArea = visualiserArea;
+    audioProcessor.waveformViewer.setBounds(waveformArea.withSizeKeepingCentre(283, 100));
+    auto waveformBounds = waveformArea.withSizeKeepingCentre(285, 120);
 
     auto filterArea = bounds.removeFromLeft(bounds.getWidth() * 0.5);
     auto lowCutArea = filterArea.removeFromLeft(filterArea.getWidth() * 0.5);
@@ -952,8 +966,10 @@ void CourseworkPluginAudioProcessorEditor::resized()
     auto bounds = getLocalBounds();
 
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
-    auto spectrumArea = visualiserArea.removeFromLeft(visualiserArea.getWidth() * 0.625);
-    auto waveformArea = visualiserArea;
+    auto spectrumArea = visualiserArea.removeFromLeft(485);
+    auto waveformArea = visualiserArea.removeFromRight(295);
+    auto meterArea = visualiserArea;
+
     //audioProcessor.waveformViewer.setBounds(waveformArea);
 
     responseCurveComponent.setBounds(spectrumArea);
@@ -985,6 +1001,9 @@ void CourseworkPluginAudioProcessorEditor::resized()
     driveSlider.setBounds(driveArea.withSizeKeepingCentre(150, 230));
     postGainSlider.setBounds(postGainArea.withSizeKeepingCentre(150, 230));
     distortionMix.setBounds(distortionMixArea);
+
+    verticalMeterL.setBounds(meterArea.getX() + 5, meterArea.getY(), 10, meterArea.getHeight());
+    verticalMeterR.setBounds(meterArea.getX() + 15, meterArea.getY(), 10, meterArea.getHeight());
 }
 
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()

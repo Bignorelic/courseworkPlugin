@@ -284,6 +284,8 @@ public:
     using BlockType = juce::AudioBuffer<float>;
     SingleChannelSampleFifo<BlockType> leftChannelFifo { Channel::Left };
     SingleChannelSampleFifo<BlockType> rightChannelFifo { Channel::Right };
+
+    float getRmsValue(const int channel) const;
 private:
     MonoChain leftChain, rightChain;
 
@@ -293,6 +295,8 @@ private:
     void updateFilters();
 
     juce::dsp::Oscillator<float> osc;
+
+    float rmsLevelLeft, rmsLevelRight;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CourseworkPluginAudioProcessor)

@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "Component//VerticalMeter.h"
 
 enum FFTOrder
 {
@@ -329,16 +330,16 @@ private:
 
 //==============================================================================
 
-class CourseworkPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
+class CourseworkPluginAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
     CourseworkPluginAudioProcessorEditor (CourseworkPluginAudioProcessor&);
     ~CourseworkPluginAudioProcessorEditor() override;
 
     //==============================================================================
+    void timerCallback() override;
     void paint (juce::Graphics&) override;
     void resized() override;
-
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -379,7 +380,10 @@ private:
 
     LookAndFeel lnf;
 
+    Gui::VerticalMeter verticalMeterL, verticalMeterR;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CourseworkPluginAudioProcessorEditor)
 };
 
 void labelWriter(juce::Graphics& g, juce::Rectangle<int> area, juce::String text, int yPos);
+

@@ -3,6 +3,9 @@
 <JUCERPROJECT id="cNTPPL" name="courseworkPlugin" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" cppLanguageStandard="17">
   <MAINGROUP id="jjIC04" name="courseworkPlugin">
+    <GROUP id="{08A2A700-432F-5EFC-2996-2C88B1A7F7EA}" name="Component">
+      <FILE id="lrfw9m" name="VerticalMeter.h" compile="0" resource="0" file="Source/Component/VerticalMeter.h"/>
+    </GROUP>
     <GROUP id="{7C24977D-0B1B-A508-6E62-AEDDE2D69011}" name="Source">
       <FILE id="KbRSE1" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

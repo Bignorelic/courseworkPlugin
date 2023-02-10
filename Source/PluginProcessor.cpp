@@ -281,6 +281,10 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     //update FFT spectrum analyser
     leftChannelFifo.update(buffer);
     rightChannelFifo.update(buffer);
+
+    //level meter
+    rmsLevelLeft = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
+    rmsLevelRight = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
 }
 
 float gainToAmplifier(float gain)
@@ -326,6 +330,16 @@ void CourseworkPluginAudioProcessor::setStateInformation (const void* data, int 
     //    apvts.replaceState(tree);
     //    updateFilter();
     //}
+}
+
+float CourseworkPluginAudioProcessor::getRmsValue(const int channel) const
+{
+    jassert(channel == 0 || channel == 1);
+    if (channel == 0)
+        return rmsLevelLeft;
+    if (channel == 1)
+        return rmsLevelRight;
+    return 0.f;
 }
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
