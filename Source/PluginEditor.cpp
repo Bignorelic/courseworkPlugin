@@ -933,6 +933,10 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     g.setColour(Colours::grey);
     g.drawHorizontalLine(24, waveformArea.getX(), waveformArea.getRight());
     g.drawHorizontalLine(waveformArea.getHeight() - 24, waveformArea.getX(), waveformArea.getRight());
+
+    //outline for the level meters
+    auto meterOutline = meterArea.withSizeKeepingCentre(meterArea.getWidth() - 6, meterArea.getHeight());
+    g.drawRoundedRectangle(meterOutline.removeFromBottom(meterOutline.getHeight() - 10).toFloat(), 4.f, 1.f);
 }
 
 void labelWriter(juce::Graphics&g, //juce graphics
