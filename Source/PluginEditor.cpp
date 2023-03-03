@@ -552,14 +552,17 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void ResponseCurveComponent::timerCallback()
 {
-    //get values
-    auto fftBounds = getAnalysisArea().toFloat();
-    auto sampleRate = audioProcessor.getSampleRate();
+    if (shouldShowFFTAnalysis)
+    {
+        //get values
+        auto fftBounds = getAnalysisArea().toFloat();
+        auto sampleRate = audioProcessor.getSampleRate();
 
-    //produce path for eachh stereo channel
-    leftPathProducer.process(fftBounds, sampleRate);
-    rightPathProducer.process(fftBounds, sampleRate);
-
+        //produce path for eachh stereo channel
+        leftPathProducer.process(fftBounds, sampleRate);
+        rightPathProducer.process(fftBounds, sampleRate);
+    }
+    
     //if parameters change
     //  update the curve
     if (parametersChanged.compareAndSetBool(false, true))
@@ -665,19 +668,22 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         responseCurve.lineTo(spectrumArea.getX() + i, map(mags[i]));
     };
 
-    //generate and paint left channel FFT path
-    auto leftChannelFFTPath = leftPathProducer.getPath();
-    leftChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
+    if (shouldShowFFTAnalysis)
+    {
+        //generate and paint left channel FFT path
+        auto leftChannelFFTPath = leftPathProducer.getPath();
+        leftChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
 
-    g.setColour(Colours::slateblue);
-    g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
+        g.setColour(Colours::slateblue);
+        g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
 
-    //generate and paint right channel FFT path
-    auto rightChannelFFTPath = rightPathProducer.getPath();
-    rightChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
+        //generate and paint right channel FFT path
+        auto rightChannelFFTPath = rightPathProducer.getPath();
+        rightChannelFFTPath.applyTransform(AffineTransform().translation(spectrumArea.getX(), spectrumArea.getY()));
 
-    //g.setColour(Colours::red);
-    g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
+        //g.setColour(Colours::red);
+        g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
+    }
 
     //draws a box for the area
     g.setColour(Colours::lavender);
@@ -873,6 +879,17 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     lowCutBypassButton.setLookAndFeel(&lnf);
     highCutBypassButton.setLookAndFeel(&lnf);
     spectrumEnabledButton.setLookAndFeel(&lnf);
+
+
+    auto safePtr = juce::Component::SafePointer<CourseworkPluginAudioProcessorEditor>(this);
+    spectrumEnabledButton.onClick = [safePtr]()
+    {
+        if (auto* comp = safePtr.getComponent())
+        {
+            bool enabled = comp->spectrumEnabledButton.getToggleState();
+            comp->responseCurveComponent.toggleSpectrumEnablement(enabled);
+        }
+    };
 
     addAndMakeVisible(verticalMeterL);
     addAndMakeVisible(verticalMeterR);

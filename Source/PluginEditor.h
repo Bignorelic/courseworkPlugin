@@ -311,6 +311,11 @@ struct ResponseCurveComponent : juce::Component,
 
     void paint(juce::Graphics& g) override;
     void resized() override;
+
+    void toggleSpectrumEnablement(bool enabled)
+    {
+        shouldShowFFTAnalysis = enabled;
+    }   
 private:
     CourseworkPluginAudioProcessor& audioProcessor;
     juce::Atomic<bool> parametersChanged{ false };
@@ -326,6 +331,8 @@ private:
     juce::Rectangle<int> getAnalysisArea();
     
     PathProducer leftPathProducer, rightPathProducer;
+
+    bool shouldShowFFTAnalysis = true;
 };
 
 //==============================================================================
