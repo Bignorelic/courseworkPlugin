@@ -862,7 +862,7 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     addAndMakeVisible(verticalMeterR);
 
     //plugin size
-    setSize (800, 400);
+    setSize (820, 420);
 
     startTimerHz(60);
 }
@@ -887,7 +887,7 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
 
     g.fillAll(Colours::black);
 
-    auto bounds = getLocalBounds();
+    auto bounds = getLocalBounds().withSizeKeepingCentre(800, 400);
 
     //set bounds for everything
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
@@ -935,8 +935,14 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     g.drawHorizontalLine(waveformArea.getHeight() - 24, waveformArea.getX(), waveformArea.getRight());
 
     //outline for the level meters
+    g.setColour(Colours::lavender);
     auto meterOutline = meterArea.withSizeKeepingCentre(meterArea.getWidth() - 6, meterArea.getHeight());
     g.drawRoundedRectangle(meterOutline.removeFromBottom(meterOutline.getHeight() - 10).toFloat(), 4.f, 1.f);
+
+    //outline of the plugin
+    g.setColour(Colour(31u, 21u, 57u));
+    auto pluginOutline = getLocalBounds()/*.withSizeKeepingCentre(805, 405)*/;
+    g.drawRoundedRectangle(pluginOutline.toFloat(), 8.f, 6.f);
 }
 
 void labelWriter(juce::Graphics&g, //juce graphics
@@ -967,7 +973,7 @@ void CourseworkPluginAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     //making bounds for everything
-    auto bounds = getLocalBounds();
+    auto bounds = getLocalBounds().withSizeKeepingCentre(800, 400);
 
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(485);
