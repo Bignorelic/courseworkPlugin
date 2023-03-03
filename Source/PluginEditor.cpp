@@ -343,41 +343,67 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g,
     bool shouldDrawButtonAsDown)
 {
     using namespace juce;
-    
-    Path powerButton;
 
-    //set bounds
-    auto bounds = toggleButton.getLocalBounds();
-    auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 12;
-    auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
-    r.setCentre(r.getCentreX(), r.getCentreY() + 5);
+    if (auto* pb = dynamic_cast<PowerButton*>(&toggleButton))
+    {
 
-    float ang = 30.f;
-    size -= 10;
+        Path powerButton;
 
-    //adds an arc to the path
-    powerButton.addCentredArc(r.getCentreX(), 
-        r.getCentreY(), 
-        size * 0.5, 
-        size * 0.5, 
-        0.f, 
-        degreesToRadians(ang), 
-        degreesToRadians(360.f - ang), 
-        true);
+        //set bounds
+        auto bounds = toggleButton.getLocalBounds();
+        auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 12;
+        auto r = bounds.withSizeKeepingCentre(size, size).toFloat();
+        r.setCentre(r.getCentreX(), r.getCentreY() + 5);
 
-    //add a vertical line to the path
-    powerButton.startNewSubPath(r.getCentreX(), r.getY());
-    powerButton.lineTo(r.getCentre());
-    
-    PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
-    
-    //change colour for each state of the toggle button
-    auto colour = toggleButton.getToggleState() ? Colours::dimgrey : Colours::aliceblue;
+        float ang = 30.f;
+        size -= 10;
 
-    //set colour, draw path and draw circle around it
-    g.setColour(colour);
-    g.strokePath(powerButton, pst);
-    g.drawEllipse(r, 2);
+        //adds an arc to the path
+        powerButton.addCentredArc(r.getCentreX(),
+            r.getCentreY(),
+            size * 0.5,
+            size * 0.5,
+            0.f,
+            degreesToRadians(ang),
+            degreesToRadians(360.f - ang),
+            true);
+
+        //add a vertical line to the path
+        powerButton.startNewSubPath(r.getCentreX(), r.getY());
+        powerButton.lineTo(r.getCentre());
+
+        PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
+
+        //change colour for each state of the toggle button
+        auto colour = toggleButton.getToggleState() ? Colours::dimgrey : Colours::aliceblue;
+
+        //set colour, draw path and draw circle around it
+        g.setColour(colour);
+        g.strokePath(powerButton, pst);
+        g.drawEllipse(r, 2);
+    }
+    else if (auto* spectrumButton = dynamic_cast<SpectrumButton*>(&toggleButton))
+    {
+        auto colour = !toggleButton.getToggleState() ? Colours::dimgrey : Colours::aliceblue;
+        g.setColour(colour);
+
+        auto bounds = toggleButton.getLocalBounds();
+        g.drawRect(bounds);
+
+        auto insetRect = bounds.reduced(4);
+        Path randomPath;
+        Random r;
+        randomPath.startNewSubPath(insetRect.getX(), 
+            insetRect.getY() + insetRect.getHeight() * r.nextFloat());
+
+        for (auto x = insetRect.getX() + 1; x < insetRect.getRight(); x += 2)
+        {
+            randomPath.lineTo(x,
+                insetRect.getY() + insetRect.getHeight() * r.nextFloat());
+        }
+
+        g.strokePath(randomPath, PathStrokeType(1.f));
+    }
 }
 
 //===============================================================================//
@@ -839,7 +865,8 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     highCutSlopeSelectAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSelect),
 
     lowCutBypassButtonAttachment    (audioProcessor.apvts, "LowCut Bypassed", lowCutBypassButton),
-    highCutBypassButtonAttachment   (audioProcessor.apvts, "HighCut Bypassed", highCutBypassButton)
+    highCutBypassButtonAttachment   (audioProcessor.apvts, "HighCut Bypassed", highCutBypassButton),
+    spectrumEnabledButtonAttachment (audioProcessor.apvts, "Spectrum Enabled", spectrumEnabledButton)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -857,12 +884,13 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
 
     lowCutBypassButton.setLookAndFeel(&lnf);
     highCutBypassButton.setLookAndFeel(&lnf);
+    spectrumEnabledButton.setLookAndFeel(&lnf);
 
     addAndMakeVisible(verticalMeterL);
     addAndMakeVisible(verticalMeterR);
 
     //plugin size
-    setSize (820, 420);
+    setSize (820, 445);
 
     startTimerHz(60);
 }
@@ -871,6 +899,7 @@ CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
 {
     lowCutBypassButton.setLookAndFeel(nullptr);
     highCutBypassButton.setLookAndFeel(nullptr);
+    spectrumEnabledButton.setLookAndFeel(nullptr);
 }
 
 void CourseworkPluginAudioProcessorEditor::timerCallback()
@@ -887,7 +916,9 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
 
     g.fillAll(Colours::black);
 
-    auto bounds = getLocalBounds().withSizeKeepingCentre(800, 400);
+    auto bounds = getLocalBounds().withSizeKeepingCentre(800, 425);
+
+    auto spectrumEnabledArea = bounds.removeFromTop(25);
 
     //set bounds for everything
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
@@ -931,8 +962,8 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     g.setColour(Colours::lavender);
     g.drawRoundedRectangle(waveformBounds.toFloat(), 4.f, 1.f);
     g.setColour(Colours::grey);
-    g.drawHorizontalLine(24, waveformArea.getX(), waveformArea.getRight());
-    g.drawHorizontalLine(waveformArea.getHeight() - 24, waveformArea.getX(), waveformArea.getRight());
+    g.drawHorizontalLine(59, waveformArea.getX(), waveformArea.getRight());
+    g.drawHorizontalLine(waveformArea.getHeight() + 10, waveformArea.getX(), waveformArea.getRight());
 
     //outline for the level meters
     g.setColour(Colours::lavender);
@@ -973,7 +1004,14 @@ void CourseworkPluginAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     //making bounds for everything
-    auto bounds = getLocalBounds().withSizeKeepingCentre(800, 400);
+    auto bounds = getLocalBounds().withSizeKeepingCentre(800, 425);
+
+    auto spectrumEnabledArea = bounds.removeFromTop(25);
+    spectrumEnabledArea.setWidth(100);
+    spectrumEnabledArea.setX(10);
+    spectrumEnabledArea.removeFromBottom(2);
+
+    spectrumEnabledButton.setBounds(spectrumEnabledArea);
 
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(485);
@@ -1031,6 +1069,7 @@ std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
         &responseCurveComponent,
 
         &lowCutBypassButton,
-        &highCutBypassButton
+        &highCutBypassButton,
+        &spectrumEnabledButton
     };
 }

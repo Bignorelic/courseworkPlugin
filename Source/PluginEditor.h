@@ -330,6 +330,9 @@ private:
 
 //==============================================================================
 
+struct PowerButton : juce::ToggleButton {};
+struct SpectrumButton : juce::ToggleButton {};
+
 class CourseworkPluginAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
@@ -370,11 +373,13 @@ private:
         lowCutSlopeSelectAttachment,
         highCutSlopeSelectAttachment;
 
-    juce::ToggleButton lowCutBypassButton, highCutBypassButton;
+    PowerButton lowCutBypassButton, highCutBypassButton;
+    SpectrumButton spectrumEnabledButton;
 
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowCutBypassButtonAttachment,
-        highCutBypassButtonAttachment;
+        highCutBypassButtonAttachment,
+        spectrumEnabledButtonAttachment;
 
     std::vector<juce::Component*> getComps();
 

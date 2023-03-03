@@ -415,6 +415,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     //toggle box for bypass buttons
     layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
+    layout.add(std::make_unique<juce::AudioParameterBool>("Spectrum Enabled", "Spectrum Enabled", true));
 
     return layout;
 }
