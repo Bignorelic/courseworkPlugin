@@ -1006,8 +1006,8 @@ void CourseworkPluginAudioProcessorEditor::resized()
     postGainSlider.setBounds(postGainArea.withSizeKeepingCentre(150, 230));
     distortionMix.setBounds(distortionMixArea);
 
-    verticalMeterL.setBounds(meterArea.getX() + 5, meterArea.getY(), 10, meterArea.getHeight());
-    verticalMeterR.setBounds(meterArea.getX() + 15, meterArea.getY(), 10, meterArea.getHeight());
+    verticalMeterL.setBounds(meterArea.getX() + 6, meterArea.getY(), 8, meterArea.getHeight());
+    verticalMeterR.setBounds(meterArea.getX() + 16, meterArea.getY(), 8, meterArea.getHeight());
 }
 
 std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()

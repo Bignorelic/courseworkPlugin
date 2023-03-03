@@ -296,7 +296,7 @@ private:
 
     juce::dsp::Oscillator<float> osc;
 
-    float rmsLevelLeft, rmsLevelRight;
+    juce::LinearSmoothedValue<float> rmsLevelLeft, rmsLevelRight;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CourseworkPluginAudioProcessor)

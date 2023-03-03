@@ -168,6 +168,12 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
     leftChannelFifo.prepare(samplesPerBlock);
     rightChannelFifo.prepare(samplesPerBlock);
 
+    rmsLevelLeft.reset(sampleRate, 0.5);
+    rmsLevelRight.reset(sampleRate, 0.5);
+
+    rmsLevelLeft.setCurrentAndTargetValue(-100.f);
+    rmsLevelRight.setCurrentAndTargetValue(-100.f);
+
     //sine oscillator tester
     osc.initialise([](float x) { return std::sin(x); });
 
@@ -283,8 +289,23 @@ void CourseworkPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     rightChannelFifo.update(buffer);
 
     //level meter
-    rmsLevelLeft = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
-    rmsLevelRight = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
+
+    rmsLevelLeft.skip(buffer.getNumSamples());
+    rmsLevelRight.skip(buffer.getNumSamples());
+    {
+        const auto value = juce::Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
+        if (value < rmsLevelLeft.getCurrentValue())
+            rmsLevelLeft.setTargetValue(value);
+        else
+            rmsLevelLeft.setCurrentAndTargetValue(value);
+    }
+    {
+        const auto value = juce::Decibels::gainToDecibels(buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
+        if (value < rmsLevelRight.getCurrentValue())
+            rmsLevelRight.setTargetValue(value);
+        else
+            rmsLevelRight.setCurrentAndTargetValue(value);
+    }
 }
 
 float gainToAmplifier(float gain)
@@ -336,9 +357,9 @@ float CourseworkPluginAudioProcessor::getRmsValue(const int channel) const
 {
     jassert(channel == 0 || channel == 1);
     if (channel == 0)
-        return rmsLevelLeft;
+        return rmsLevelLeft.getCurrentValue();
     if (channel == 1)
-        return rmsLevelRight;
+        return rmsLevelRight.getCurrentValue();
     return 0.f;
 }
 
