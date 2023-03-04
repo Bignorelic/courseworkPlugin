@@ -175,11 +175,11 @@ void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int sampl
     rmsLevelRight.setCurrentAndTargetValue(-100.f);
 
     //sine oscillator tester
-    osc.initialise([](float x) { return std::sin(x); });
+    //osc.initialise([](float x) { return std::sin(x); });
 
-    spec.numChannels = getTotalNumOutputChannels();
-    osc.prepare(spec);
-    osc.setFrequency(50);
+    //spec.numChannels = getTotalNumOutputChannels();
+    //osc.prepare(spec);
+    //osc.setFrequency(50);
 }
 
 void CourseworkPluginAudioProcessor::releaseResources()
@@ -334,9 +334,9 @@ void CourseworkPluginAudioProcessor::getStateInformation (juce::MemoryBlock& des
     // as intermediaries to make it easy to save and load complex data.
 
 
-    ////saving the parameter states
-    //juce::MemoryOutputStream mos(destData, true);
-    //apvts.state.writeToStream(mos);
+    //saving the parameter states
+    juce::MemoryOutputStream mos(destData, true);
+    apvts.state.writeToStream(mos);
 }
 
 void CourseworkPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -344,13 +344,13 @@ void CourseworkPluginAudioProcessor::setStateInformation (const void* data, int 
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 
-    ////loading parameter states
-    //auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
-    //if (tree.isValid())
-    //{
-    //    apvts.replaceState(tree);
-    //    updateFilter();
-    //}
+    //loading parameter states
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid())
+    {
+        apvts.replaceState(tree);
+        updateFilters();
+    }
 }
 
 float CourseworkPluginAudioProcessor::getRmsValue(const int channel) const
