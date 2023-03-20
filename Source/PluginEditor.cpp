@@ -235,7 +235,7 @@ void LookAndFeel::drawLinearSlider(juce::Graphics& g,
 
     //draw box
     g.setColour(Colour(27u, 19u, 37u));
-    g.fillRoundedRectangle(bounds, 2.f);
+    g.fillRoundedRectangle(bounds, 10.f);
 
     //draw outline of box
     g.setColour(Colour(209u, 224u, 248u));
@@ -702,7 +702,9 @@ void ResponseCurveComponent::resized()
     Graphics g(background);
 
     g.setColour(juce::Colours::black);
+    //g.setOpacity(0.5f);
     g.fillRoundedRectangle(getRenderArea().toFloat(), 4.f);
+    g.setOpacity(1.f);
 
     Array<float> mainFreqs
     {
@@ -970,8 +972,10 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
 
     //draw lines for waveform visualiser
     g.setColour(Colours::black);
+    //g.setOpacity(0.5f);
     g.fillRoundedRectangle(waveformBounds.toFloat(), 4.f);
     g.setColour(Colours::lavender);
+    g.setOpacity(1.f);
     g.drawRoundedRectangle(waveformBounds.toFloat(), 4.f, 1.f);
     g.setColour(Colours::grey);
     g.drawHorizontalLine(59, waveformArea.getX(), waveformArea.getRight());
@@ -980,8 +984,10 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     //outline for the level meters
     auto meterOutline = meterArea.withSizeKeepingCentre(meterArea.getWidth() - 6, meterArea.getHeight());
     g.setColour(Colours::black);
+    //g.setOpacity(0.5f);
     g.fillRoundedRectangle(meterOutline.withTrimmedTop(10).toFloat(), 4.f);
     g.setColour(Colours::lavender);
+    g.setOpacity(1.f);
     g.drawRoundedRectangle(meterOutline.removeFromBottom(meterOutline.getHeight() - 10).toFloat(), 4.f, 1.f);
 
     //outline of the plugin
