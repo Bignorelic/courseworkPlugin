@@ -416,7 +416,7 @@ void VerticalLinearSlider::paint(juce::Graphics& g)
 
     //draw surrounding box
     g.setColour(Colour(27u, 19u, 37u));
-    g.fillRoundedRectangle(bounds, 2.f);
+    g.fillRoundedRectangle(bounds, 10.f);
 
     //draw outline
     g.setColour(Colour(209u, 224u, 248u));
@@ -594,7 +594,7 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 {
     using namespace juce;
 
-    g.fillAll(Colours::black);
+    //g.fillAll(Colours::black);
 
     g.drawImage(background, getLocalBounds().toFloat());
 
@@ -697,9 +697,12 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 void ResponseCurveComponent::resized()
 {
     using namespace juce;
-    background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);  
+    background = Image(Image::PixelFormat::ARGB, getWidth(), getHeight(), true);  
 
     Graphics g(background);
+
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(getRenderArea().toFloat(), 4.f);
 
     Array<float> mainFreqs
     {
@@ -920,6 +923,8 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     using namespace juce;
 
     g.fillAll(Colours::black);
+    background = juce::ImageCache::getFromMemory(BinaryData::bg_png, BinaryData::bg_pngSize);
+    g.drawImageWithin(background, 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
 
     auto bounds = getLocalBounds().withSizeKeepingCentre(800, 425);
 
@@ -964,6 +969,8 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     labelWriter(g, postGainArea, "Post Gain", 1);
 
     //draw lines for waveform visualiser
+    g.setColour(Colours::black);
+    g.fillRoundedRectangle(waveformBounds.toFloat(), 4.f);
     g.setColour(Colours::lavender);
     g.drawRoundedRectangle(waveformBounds.toFloat(), 4.f, 1.f);
     g.setColour(Colours::grey);
@@ -971,8 +978,10 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     g.drawHorizontalLine(waveformArea.getHeight() + 10, waveformArea.getX(), waveformArea.getRight());
 
     //outline for the level meters
-    g.setColour(Colours::lavender);
     auto meterOutline = meterArea.withSizeKeepingCentre(meterArea.getWidth() - 6, meterArea.getHeight());
+    g.setColour(Colours::black);
+    g.fillRoundedRectangle(meterOutline.withTrimmedTop(10).toFloat(), 4.f);
+    g.setColour(Colours::lavender);
     g.drawRoundedRectangle(meterOutline.removeFromBottom(meterOutline.getHeight() - 10).toFloat(), 4.f, 1.f);
 
     //outline of the plugin
