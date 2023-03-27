@@ -1011,10 +1011,24 @@ void labelWriter(juce::Graphics&g, //juce graphics
     else
         offset = 85;
 
+    int width;
+    if (text == "Drive")
+        width = 35;
+    else if (text == "Drive Mix" || text == "Post Gain")
+        width = 60;
+    else
+        width = 55;
+
     //set area size
     textArea.setCentre(area.getCentreX(), area.getCentreY() + offset);
 
+    //draw text box
+    g.setColour(juce::Colours::black);
+    auto textBox = textArea.withSizeKeepingCentre(width, 20);
+    g.fillRect(textBox);
+
     //draw text
+    g.setColour(juce::Colours::white);
     g.drawFittedText(text, textArea, juce::Justification::centred, 1);
 }
 
