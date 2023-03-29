@@ -1035,17 +1035,6 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     g.setColour(Colour(31u, 21u, 57u));
     auto pluginOutline = getLocalBounds()/*.withSizeKeepingCentre(805, 405)*/;
     g.drawRoundedRectangle(pluginOutline.toFloat(), 8.f, 6.f);
-
-    ////help bounds
-    //auto helpBox = getLocalBounds();
-
-    //if (showHelp)
-    //{
-    //    //help
-    //    g.setColour(Colours::white);
-    //    //g.fillRoundedRectangle(spectrumArea.getX() + 40, spectrumArea.getY() - 50, spectrumArea.getWidth() - 80, spectrumArea.getHeight() + 5, 5.f);
-    //    g.fillRect(helpBox);
-    //}
 }
 
 void labelWriter(juce::Graphics&g, //juce graphics
