@@ -316,6 +316,10 @@ struct ResponseCurveComponent : juce::Component,
     {
         shouldShowFFTAnalysis = enabled;
     }   
+    void toggleHelpMenu(bool enabled)
+    {
+        showHelp = enabled;
+    }
 private:
     CourseworkPluginAudioProcessor& audioProcessor;
     juce::Atomic<bool> parametersChanged{ false };
@@ -333,11 +337,13 @@ private:
     PathProducer leftPathProducer, rightPathProducer;
 
     bool shouldShowFFTAnalysis = true;
+    bool showHelp = false;
 };
 
 //==============================================================================
 
 struct PowerButton : juce::ToggleButton {};
+
 struct SpectrumButton : juce::ToggleButton 
 {
     void resized() override
@@ -360,6 +366,8 @@ struct SpectrumButton : juce::ToggleButton
     juce::Path randomPath;
 };
 
+struct HelpButton : juce::ToggleButton {};
+
 class CourseworkPluginAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
@@ -370,6 +378,10 @@ public:
     void timerCallback() override;
     void paint (juce::Graphics&) override;
     void resized() override;
+    void toggleHelpMenu(bool enabled)
+    {
+        showHelp = enabled;
+    }
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -402,19 +414,24 @@ private:
         lowCutSlopeSelectAttachment,
         highCutSlopeSelectAttachment;
 
-    PowerButton lowCutBypassButton, highCutBypassButton;
+    PowerButton lowCutBypassButton, 
+        highCutBypassButton;
     SpectrumButton spectrumEnabledButton;
+    HelpButton helpButton;
 
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowCutBypassButtonAttachment,
         highCutBypassButtonAttachment,
-        spectrumEnabledButtonAttachment;
+        spectrumEnabledButtonAttachment,
+        helpButtonAttachment;
 
     std::vector<juce::Component*> getComps();
 
     LookAndFeel lnf;
 
     Gui::VerticalMeter verticalMeterL, verticalMeterR;
+
+    bool showHelp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CourseworkPluginAudioProcessorEditor)
 };

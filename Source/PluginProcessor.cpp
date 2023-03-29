@@ -417,6 +417,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout CourseworkPluginAudioProcess
     layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("Spectrum Enabled", "Spectrum Enabled", true));
 
+    //toggle box for help menu
+    layout.add(std::make_unique<juce::AudioParameterBool>("Help Button", "Help Button", false));
+
     return layout;
 }
 

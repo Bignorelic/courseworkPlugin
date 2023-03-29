@@ -692,6 +692,22 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     //draws the curve
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
+
+    if (showHelp)
+    {
+        //help
+        g.fillRoundedRectangle(getLocalBounds().getX() + 40, getLocalBounds().getY() + 5, getLocalBounds().getWidth() - 80, getLocalBounds().getHeight() - 5, 5.f);
+        g.setColour(Colours::black);
+        g.setFont(12);
+        g.drawMultiLineText("Help Menu",
+            getLocalBounds().getX() + 40, 20/*getLocalBounds().getY()*/, getLocalBounds().getWidth() - 80, Justification::centred, 0.0f);
+        g.drawMultiLineText("Low/ High Cut: The knob is the frequency knob, it changes where the sound of the filter. The sliders at the bottom determines how strong and how steep the filters are. There is a power button above each knob to turn the filters off. ",
+            getLocalBounds().getX() + 40, 35/*getLocalBounds().getY()*/, getLocalBounds().getWidth() - 80, Justification::centred, 0.0f);
+        g.drawMultiLineText("Distortion: The Drive knob is used to amplify the audio. The more you amplify, the more the audio clips. You can mix in the original sound back with the Mix slider. The Post Gain knob is used to decrease the volume after distortion. ",
+            getLocalBounds().getX() + 40, 80/*getLocalBounds().getY()*/, getLocalBounds().getWidth() - 80, Justification::centred, 0.0f);
+        g.drawMultiLineText("Spectrum Analyser: You can disable the analyser by pressing the icon in the top left to minimise latency. ",
+            getLocalBounds().getX() + 40, 125/*getLocalBounds().getY()*/, getLocalBounds().getWidth() - 80, Justification::centred, 0.0f);
+    }
 }
 
 void ResponseCurveComponent::resized()
@@ -865,7 +881,8 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
 
     lowCutBypassButtonAttachment    (audioProcessor.apvts, "LowCut Bypassed", lowCutBypassButton),
     highCutBypassButtonAttachment   (audioProcessor.apvts, "HighCut Bypassed", highCutBypassButton),
-    spectrumEnabledButtonAttachment (audioProcessor.apvts, "Spectrum Enabled", spectrumEnabledButton)
+    spectrumEnabledButtonAttachment (audioProcessor.apvts, "Spectrum Enabled", spectrumEnabledButton),
+    helpButtonAttachment            (audioProcessor.apvts, "Help Button", helpButton)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -884,6 +901,7 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
     lowCutBypassButton.setLookAndFeel(&lnf);
     highCutBypassButton.setLookAndFeel(&lnf);
     spectrumEnabledButton.setLookAndFeel(&lnf);
+    helpButton.setLookAndFeel(&lnf);
 
 
     auto safePtr = juce::Component::SafePointer<CourseworkPluginAudioProcessorEditor>(this);
@@ -893,6 +911,16 @@ CourseworkPluginAudioProcessorEditor::CourseworkPluginAudioProcessorEditor (Cour
         {
             bool enabled = comp->spectrumEnabledButton.getToggleState();
             comp->responseCurveComponent.toggleSpectrumEnablement(enabled);
+        }
+    };
+
+    helpButton.onClick = [safePtr]()
+    {
+        if (auto* comp = safePtr.getComponent())
+        {
+            bool enabled = comp->helpButton.getToggleState();
+            //comp->toggleHelpMenu(enabled);
+            comp->responseCurveComponent.toggleHelpMenu(enabled);
         }
     };
 
@@ -910,6 +938,7 @@ CourseworkPluginAudioProcessorEditor::~CourseworkPluginAudioProcessorEditor()
     lowCutBypassButton.setLookAndFeel(nullptr);
     highCutBypassButton.setLookAndFeel(nullptr);
     spectrumEnabledButton.setLookAndFeel(nullptr);
+    helpButton.setLookAndFeel(nullptr);
 }
 
 void CourseworkPluginAudioProcessorEditor::timerCallback()
@@ -931,6 +960,18 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     auto bounds = getLocalBounds().withSizeKeepingCentre(800, 425);
 
     auto spectrumEnabledArea = bounds.removeFromTop(25);
+    spectrumEnabledArea.setWidth(100);
+    spectrumEnabledArea.setX(10);
+    spectrumEnabledArea.removeFromBottom(2);
+
+    auto helpButtonArea = spectrumEnabledArea;
+    helpButtonArea.setX(126);
+    helpButtonArea.setWidth(15);
+    helpButtonArea.setHeight(15);
+    helpButtonArea.setY(14);
+    g.setColour(Colours::white);
+    g.drawRect(helpButtonArea);
+    g.drawFittedText("?", helpButtonArea, Justification::centred, 1, 0.0f);
 
     //set bounds for everything
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
@@ -994,6 +1035,17 @@ void CourseworkPluginAudioProcessorEditor::paint(juce::Graphics& g)
     g.setColour(Colour(31u, 21u, 57u));
     auto pluginOutline = getLocalBounds()/*.withSizeKeepingCentre(805, 405)*/;
     g.drawRoundedRectangle(pluginOutline.toFloat(), 8.f, 6.f);
+
+    ////help bounds
+    //auto helpBox = getLocalBounds();
+
+    //if (showHelp)
+    //{
+    //    //help
+    //    g.setColour(Colours::white);
+    //    //g.fillRoundedRectangle(spectrumArea.getX() + 40, spectrumArea.getY() - 50, spectrumArea.getWidth() - 80, spectrumArea.getHeight() + 5, 5.f);
+    //    g.fillRect(helpBox);
+    //}
 }
 
 void labelWriter(juce::Graphics&g, //juce graphics
@@ -1046,6 +1098,13 @@ void CourseworkPluginAudioProcessorEditor::resized()
     spectrumEnabledArea.removeFromBottom(2);
 
     spectrumEnabledButton.setBounds(spectrumEnabledArea);
+
+    auto helpButtonArea = spectrumEnabledArea;
+    helpButtonArea.setX(126);
+    helpButtonArea.setWidth(15);
+    helpButtonArea.setHeight(15);
+    helpButtonArea.setY(14);
+    helpButton.setBounds(helpButtonArea);
 
     auto visualiserArea = bounds.removeFromTop(bounds.getHeight() * 0.375);
     auto spectrumArea = visualiserArea.removeFromLeft(485);
@@ -1104,6 +1163,7 @@ std::vector<juce::Component*> CourseworkPluginAudioProcessorEditor::getComps()
 
         &lowCutBypassButton,
         &highCutBypassButton,
-        &spectrumEnabledButton
+        &spectrumEnabledButton,
+        &helpButton
     };
 }
