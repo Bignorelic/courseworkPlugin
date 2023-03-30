@@ -10,18 +10,6 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-
-//class Visualiser : public juce::AudioVisualiserComponent
-//{
-//public:
-//    Visualiser() : AudioVisualiserComponent(1)
-//    {
-//        //settings for waveform visualiser
-//        setBufferSize(64);
-//        setSamplesPerBlock(256);
-//    }
-//};
-
 //==============================================================================
 //==============================================================================
 
@@ -48,6 +36,7 @@ CourseworkPluginAudioProcessor::~CourseworkPluginAudioProcessor()
 }
 
 //==============================================================================
+
 const juce::String CourseworkPluginAudioProcessor::getName() const
 {
     return JucePlugin_Name;
@@ -149,6 +138,7 @@ void CourseworkPluginAudioProcessor::updateFilters()
 }
 
 //==============================================================================
+
 void CourseworkPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
@@ -315,6 +305,7 @@ float gainToAmplifier(float gain)
 }
 
 //==============================================================================
+
 bool CourseworkPluginAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
@@ -327,6 +318,7 @@ juce::AudioProcessorEditor* CourseworkPluginAudioProcessor::createEditor()
 }
 
 //==============================================================================
+
 void CourseworkPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
